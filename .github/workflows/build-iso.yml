@@ -1,0 +1,56 @@
+# ============================================================
+#  镜 · ISO 云端构建流水线
+#  push 到 main 或手动触发 → GitHub x86_64 构建机出 ISO →
+#  Actions 页面直接下载「镜-0.1-DEMO.iso」成品
+#
+#  注意：znver5 全量编译在 CI 上可能超过 6 小时限额。
+#  若超时，把 hosts/mirrorhost/configuration.nix 里
+#  gcc.arch 临时改为 "x86-64-v3"（用官方二进制缓存），
+#  构建时间会从数小时降到 20-40 分钟；到真机后再改回 znver5
+#  做一次 nixos-rebuild switch 即可换回极致优化内核。
+# ============================================================
+
+name: 构建镜-ISO
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # 允许在 Actions 页面手动点按钮触发
+    inputs:
+      arch:
+        description: "编译架构（v3=快速出盘走二进制缓存；znver5=极致优化全量编译）"
+        required: true
+        default: "x86-64-v3"
+        type: choice
+        options: ["x86-64-v3", "znver5"]
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest   # x86_64-linux，与目标平台一致，无需交叉
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      # ISO 只是系统的搬运工：默认 v3 快速出盘（二进制缓存，约 20-40 分钟）。
+      # 装到 9600X 真机后把 gcc.arch 改回 znver5 做一次 nixos-rebuild switch，
+      # 最终运行的系统仍是 100% znver5 极致优化，一克不少。
+      # 想要"出生即极致"的 ISO：手动触发时选 znver5（全量编译数小时，可能需自托管 runner）。
+      - name: 按档位切换编译架构
+        run: |
+          ARCH="${{ github.event.inputs.arch || 'x86-64-v3' }}"
+          echo "构建架构档位: $ARCH"
+          sed -i "s/gcc.arch = \"znver5\"/gcc.arch = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
+          sed -i "s/gcc.tune = \"znver5\"/gcc.tune = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
+
+      - name: 构建 ISO（镜 0.1-DEMO）
+        run: nix build .#iso --accept-flake-config
+
+      - name: 上传 ISO 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: 镜-0.1-DEMO
+          path: result/iso/*.iso
+          compression-level: 0   # ISO 已压缩，不再二次压缩
