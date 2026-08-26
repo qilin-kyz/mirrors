@@ -12,51 +12,54 @@
   # 在通用 6.18 之上叠加 structuredExtraConfig：
   # 不为这台机器服务的子系统，直接从内核二进制里消失
   # （不是"不加载"，是"不存在"——攻击面与体积同步归零）。
+  # 注意：必须对 linux_x_yy 内核本体 override，再用 linuxPackagesFor
+  # 重新生成包集 —— 直接 .override 包集会在求值期炸掉（首轮 CI 实测）。
   boot.kernelPackages =
     let
-      base =
-        if pkgs ? linuxPackages_6_18
-        then pkgs.linuxPackages_6_18
-        else pkgs.linuxPackages_latest;
-    in
-    base.override {
-      structuredExtraConfig = with lib.kernel; {
-        # —— 9600X 之外的 CPU 支持：裁 ——
-        X86_INTEL_PSTATE = no;          # Intel 调速器，与本机无关
-        X86_AMD_PLATFORM_DEVICE = yes;  # AMD 平台设备（zen 必需）
+      baseKernel =
+        if pkgs ? linux_6_18
+        then pkgs.linux_6_18
+        else pkgs.linux_latest;
+      customKernel = baseKernel.override {
+        structuredExtraConfig = with lib.kernel; {
+          # —— 9600X 之外的 CPU 支持：裁 ——
+          X86_INTEL_PSTATE = no;          # Intel 调速器，与本机无关
+          X86_AMD_PLATFORM_DEVICE = yes;  # AMD 平台设备（zen 必需）
 
-        # —— 无线/蓝牙/红外：这台机器没有这些器官 ——
-        WLAN = no;
-        WIRELESS = no;
-        BT = no;
-        INFRARED = no;
-        NFC = no;
-        WIMAX = no;
+          # —— 无线/蓝牙/红外：这台机器没有这些器官 ——
+          WLAN = no;
+          WIRELESS = no;
+          BT = no;
+          IRDA = no;
+          NFC = no;
+          WIMAX = no;
 
-        # —— 音频子系统：整棵砍掉（黑名单只是不加载，这里是编译期消失）——
-        SOUND = no;
+          # —— 音频子系统：整棵砍掉（黑名单只是不加载，这里是编译期消失）——
+          SOUND = no;
 
-        # —— 与本机无关的驱动族 ——
-        INFINIBAND = no;
-        SCSI_LOWLEVEL_PCMCIA = no;
-        PCMCIA = no;
-        FIREWIRE = no;
-        THUNDERBOLT = no;
+          # —— 与本机无关的驱动族 ——
+          INFINIBAND = no;
+          SCSI_LOWLEVEL_PCMCIA = no;
+          PCMCIA = no;
+          FIREWIRE = no;
+          THUNDERBOLT = no;
 
-        # —— 9600X 虚拟化宿主的调度取向 ——
-        HZ_1000 = yes;                  # 1ms tick：实例调度响应拉满
-        HZ = freeform "1000";
-        PREEMPT_VOLUNTARY = yes;        # 吞吐与延迟的平衡点（全抢占对宿主得不偿失）
-        SCHED_CORE = yes;               # SMT 兄弟核调度感知（9600X 12 线程）
-        CPU_FREQ_DEFAULT_GOV_PERFORMANCE = yes;  # 出生即满频
+          # —— 9600X 虚拟化宿主的调度取向 ——
+          HZ_1000 = yes;                  # 1ms tick：实例调度响应拉满
+          HZ = freeform "1000";
+          PREEMPT_VOLUNTARY = yes;        # 吞吐与延迟的平衡点（全抢占对宿主得不偿失）
+          SCHED_CORE = yes;               # SMT 兄弟核调度感知（9600X 12 线程）
+          CPU_FREQ_DEFAULT_GOV_PERFORMANCE = yes;  # 出生即满频
 
-        # —— 虚拟化加速件，编译进内核而非模块 ——
-        KVM = yes;
-        KVM_AMD = yes;
-        VHOST_NET = yes;                # virtio-net 内核态数据面，省用户态往返
-        VHOST_VSOCK = yes;
+          # —— 虚拟化加速件，编译进内核而非模块 ——
+          KVM = yes;
+          KVM_AMD = yes;
+          VHOST_NET = yes;                # virtio-net 内核态数据面，省用户态往返
+          VHOST_VSOCK = yes;
+        };
       };
-    };
+    in
+    pkgs.linuxPackagesFor customKernel;
 
   # ---- Zen 5 (9600X) 运行期优化：从开机第一秒就贴着流水线走 ----
   boot.kernelParams = [
