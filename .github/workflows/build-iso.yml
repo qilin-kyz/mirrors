@@ -46,6 +46,11 @@ jobs:
           echo "构建架构档位: $ARCH"
           sed -i "s/gcc.arch = \"znver5\"/gcc.arch = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
           sed -i "s/gcc.tune = \"znver5\"/gcc.tune = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
+          # 把档位改动提交，避免 nix eval/build 因"脏 git 树"报错（nix eval 对脏树较敏感）
+          git config user.email "ci@mirroros.local"
+          git config user.name  "MirrorOS CI"
+          git add hosts/mirrorhost/configuration.nix
+          git commit -m "ci: apply arch=$ARCH for this run" || echo "nothing to commit"
 
       # 宿主配置（mirrorhost）不被 ISO 构建覆盖，单独的求值校验能提前
       # 暴露 modules/*.nix 的语法/选项错误，避免把坏配置带进真机首次 switch。
