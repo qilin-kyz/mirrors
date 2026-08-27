@@ -83,12 +83,14 @@
   ];
 
   # ---- 虚拟化宿主向内核参数微调 ----
+  # 安装盘基座 installation-device.nix 已设过 vm.overcommit_memory，
+  # 逐项 mkForce 压过基座，避免"重复定义"求值报错（mirrorhost 无此冲突）。
   boot.kernel.sysctl = {
-    "vm.swappiness" = 1;                    # 几乎不换页（且无 swap）
-    "vm.overcommit_memory" = 1;             # KVM 内存超售的通行做法
-    "net.ipv4.ip_forward" = 1;              # 实例桥接转发
-    "net.bridge.bridge-nf-call-iptables" = 0;  # 桥流量不绕 iptables，省一跳
-    "fs.inotify.max_user_watches" = 1048576;
+    "vm.swappiness" = lib.mkForce 1;                    # 几乎不换页（且无 swap）
+    "vm.overcommit_memory" = lib.mkForce 1;             # KVM 内存超售的通行做法
+    "net.ipv4.ip_forward" = lib.mkForce 1;              # 实例桥接转发
+    "net.bridge.bridge-nf-call-iptables" = lib.mkForce 0;  # 桥流量不绕 iptables，省一跳
+    "fs.inotify.max_user_watches" = lib.mkForce 1048576;
   };
 
   # ---- 驱动白名单（镜座） ----
