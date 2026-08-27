@@ -27,6 +27,8 @@ on:
 jobs:
   build-iso:
     runs-on: ubuntu-latest   # x86_64-linux，与目标平台一致，无需交叉
+    permissions:
+      contents: write        # 允许发布 Release（公开可下载 ISO）
     steps:
       - name: 检出仓库
         uses: actions/checkout@v4
@@ -65,3 +67,15 @@ jobs:
           name: 镜-0.1-DEMO
           path: result/iso/*.iso
           compression-level: 0   # ISO 已压缩，不再二次压缩
+
+      # 发布到 Release：公开、稳定 URL，免登录即可下载，也方便本机冒烟测试
+      - name: 发布 ISO 到 Release（公开可下载）
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: 镜-0.1-DEMO
+          name: 镜 0.1-DEMO
+          files: result/iso/*.iso
+          overwrite_files: true
+          body: |
+            自动构建 · NixOS 26.05 + Linux 6.18（官方二进制内核）。
+            KVM/虚拟化运行期模块已启用，安装盘开箱即可虚拟化。
