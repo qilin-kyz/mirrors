@@ -16,7 +16,6 @@
   security.audit = {
     enable = true;
     backlogLimit = 8192;        # 突发命令风暴也不丢记录
-    failureMode = "log";        # 审计子系统自身故障时：记录而非 panic（7x24 取舍）
     rules = [
       # 一切命令（64/32 位双 ABI 都罩住）
       "-a always,exit -F arch=b64 -S execve -k mirror-cmd"

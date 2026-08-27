@@ -45,8 +45,19 @@ jobs:
           sed -i "s/gcc.arch = \"znver5\"/gcc.arch = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
           sed -i "s/gcc.tune = \"znver5\"/gcc.tune = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
 
+      # 失败时把错误尾部写进工作流注解（annotations），
+      # 公开仓库的注解无需登录即可经 API 读取 —— 调试闭环自动化。
       - name: 构建 ISO（镜 0.1-DEMO）
-        run: nix build .#iso --accept-flake-config
+        run: |
+          set -o pipefail
+          if ! nix build .#iso --accept-flake-config 2>&1 | tee /tmp/build.log; then
+            MSG=$(tail -30 /tmp/build.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::$MSG"
+            exit 1
+          fi
 
       - name: 上传 ISO 产物
         uses: actions/upload-artifact@v4
