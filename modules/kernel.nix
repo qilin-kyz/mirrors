@@ -30,16 +30,14 @@
             patch = null;
             extraConfig = ''
               # —— 9600X 之外的 CPU 支持：裁 ——
-              CONFIG_X86_INTEL_PSTATE=n
+              # 注：CONFIG_X86_INTEL_PSTATE 在 6.18 已重构/更名，不再设置（本机是 Zen5）
               CONFIG_X86_AMD_PLATFORM_DEVICE=y
 
-              # —— 无线/蓝牙/红外：这台机器没有这些器官 ——
-              CONFIG_WLAN=n
+              # —— 无线/蓝牙：这台机器没有这些器官 ——
+              # 注：CONFIG_WLAN/CONFIG_IRDA/CONFIG_WIMAX 在 6.18 已移除，不再设置
               CONFIG_WIRELESS=n
               CONFIG_BT=n
-              CONFIG_IRDA=n
               CONFIG_NFC=n
-              CONFIG_WIMAX=n
 
               # —— 音频子系统：整棵砍掉 ——
               CONFIG_SOUND=n
