@@ -50,7 +50,6 @@
 
           # —— 9600X 虚拟化宿主的调度取向 ——
           HZ_1000 = lib.mkForce yes;                  # 1ms tick：实例调度响应拉满
-          HZ = lib.mkForce (freeform "1000");
           PREEMPT_VOLUNTARY = lib.mkForce yes;        # 吞吐与延迟的平衡点（全抢占对宿主得不偿失）
           SCHED_CORE = lib.mkForce yes;               # SMT 兄弟核调度感知（9600X 12 线程）
           CPU_FREQ_DEFAULT_GOV_PERFORMANCE = lib.mkForce yes;  # 出生即满频
