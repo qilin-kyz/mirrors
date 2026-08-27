@@ -1,41 +1,31 @@
 # ============================================================
-#  hardware-configuration.nix —— 占位模板
+#  hardware-configuration.nix —— 占位桩（仅用于 CI 求值）
 # ------------------------------------------------------------
-#  在目标硬件上安装时，用真实生成物替换本文件：
-#    nixos-generate-config --root /mnt
-#  然后把生成的 hardware-configuration.nix 拷回本目录。
-#
-#  三块盘的挂载约定（详见 modules/storage.nix，按尺寸自动识别）：
-#    256G  → /            系统盘（nix store + 系统数据 + 快照）
-#    1T    → /var/lib/mirror/instances   实例盘（所有 VM/容器的数据）
-#    32G   → /var/lib/mirror/iso         ISO 盘（U盘，默认只读挂载）
+#  真实部署时由 `nixos-generate-config` 在目标硬件（9600X + RTX 5070 Ti）
+#  上生成，并覆盖到本仓库 hosts/mirrorhost/ 下。
+#  此桩唯一用途：让 `nix eval .#mirrorhost` 在云端 CI 中可求值，
+#  从而验证 modules/*.nix 的语法与选项正确。
+#  ⚠️ 请勿直接用于真实装机 —— 设备名与分区均为占位，装机前务必替换。
 # ============================================================
-
 { config, lib, pkgs, modulesPath, ... }:
 
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  # —— 以下为示意，安装时以 nixos-generate-config 实际探测为准 ——
-  boot.initrd.availableKernelModules =
-    [ "nvme" "xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "usbhid" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-amd" "vfio-pci" "r8169" "r8152" ];
 
-  # fileSystems."/" = {
-  #   device = "/dev/disk/by-id/nvme-XXXX-system";
-  #   fsType = "ext4";
-  # };
-  #
-  # fileSystems."/var/lib/mirror/instances" = {
-  #   device = "/dev/disk/by-id/nvme-XXXX-instances";
-  #   fsType = "xfs";          # 大文件（磁盘镜像）友好
-  # };
-  #
-  # # 32G ISO U盘：只读、惰性挂载（插入才挂，安全默认值）
-  # fileSystems."/var/lib/mirror/iso" = {
-  #   device = "/dev/disk/by-id/usb-XXXX-iso";
-  #   fsType = "ext4";
-  #   options = [ "ro" "noauto" "x-systemd.automount" "nofail" ];
-  # };
+  boot.loader.grub.enable = true;
+  boot.loader.grub.device = "/dev/sda";
+  boot.loader.efi.canTouchEfiVariables = true;
 
-  swapDevices = [ ];   # 虚拟化宿主不 swap：内存宁可打满也不让实例换页抖动
+  fileSystems."/" = {
+    device = "/dev/disk/by-label/nixos";
+    fsType = "ext4";
+  };
+
+  swapDevices = [ ];
+
+  powerManagement.cpuFreqGovernor = lib.mkDefault "performance";
 }

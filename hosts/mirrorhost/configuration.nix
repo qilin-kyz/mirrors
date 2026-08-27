@@ -22,6 +22,7 @@
     ../../modules/network.nix
     ../../modules/storage.nix
     ../../modules/virtualization.nix
+    ../../modules/gpu-passthrough.nix
     ../../modules/security.nix
     ../../modules/session.nix
     ../../modules/snapshot.nix

@@ -23,10 +23,31 @@
     isNormalUser = true;
     description = "Mirror Keeper";
     shell = pkgs.bashInteractive;
-    initialPassword = "mirror";   # 首登强制改密（见下方 PAM 策略提示）
+    initialPassword = "mirror";   # 出厂口令；首登必须改（见下方 oneshot 强制）
     extraGroups = [ "wheel" ];    # 其余组在 virtualization.nix 追加
   };
   users.mutableUsers = true;      # 允许 passwd 改密；用户增删仍应走配置
+
+  # ---- 首登强制改密：出厂口令仅在第一次登录可用 ----
+  # chage -d 0 让账户的"上次改密时间"归零 → 任何登录都会被 PAM 要求改密。
+  # 用戳文件保证只触发一次（之后用户改过的口令不被我们反复重置）。
+  systemd.services.mirror-force-pwchange = {
+    description = "Force first-login password change for mirror";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      STAMP=/var/lib/mirror/config/.pw-forced
+      mkdir -p /var/lib/mirror/config
+      if [ ! -e "$STAMP" ]; then
+        ${pkgs.shadow}/bin/chage -d 0 mirror 2>/dev/null || true
+        touch "$STAMP"
+        echo "[镜言] mirror 用户首登将被要求强制改密"
+      fi
+    '';
+  };
 
   # ---- SSH：标准密码方式（规格 1），但只允许 mirror 用户 ----
   services.openssh = {

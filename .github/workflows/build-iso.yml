@@ -47,6 +47,22 @@ jobs:
           sed -i "s/gcc.arch = \"znver5\"/gcc.arch = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
           sed -i "s/gcc.tune = \"znver5\"/gcc.tune = \"$ARCH\"/" hosts/mirrorhost/configuration.nix
 
+      # 宿主配置（mirrorhost）不被 ISO 构建覆盖，单独的求值校验能提前
+      # 暴露 modules/*.nix 的语法/选项错误，避免把坏配置带进真机首次 switch。
+      # 放在构建之前：若有错，几秒内就挂，不浪费 20+ 分钟构建时长。
+      - name: 校验宿主配置可求值（mirrorhost）
+        run: |
+          set -o pipefail
+          if ! nix eval --accept-flake-config --raw .#mirrorhost.config.system.name 2>&1 | tee /tmp/eval.log; then
+            MSG=$(tail -40 /tmp/eval.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::宿主配置求值失败:$MSG"
+            exit 1
+          fi
+          echo "mirrorhost 配置求值通过 ✅"
+
       # 失败时把错误尾部写进工作流注解（annotations），
       # 公开仓库的注解无需登录即可经 API 读取 —— 调试闭环自动化。
       - name: 构建 ISO（镜 0.1-DEMO）

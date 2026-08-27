@@ -59,6 +59,14 @@
           }).fd ];
         };
       };
+      # 实例上联：直接挂到设计中的 2.5G 实例桥 br-vm
+      # （不再走 virbr0 NAT —— 实例流量应独立出网，见 network.nix）
+      networks = {
+        mirror-vm = {
+          bridge = "br-vm";
+          forward.mode = "bridge";   # 复用 systemd-networkd 已建的 br-vm
+        };
+      };
     };
 
     # ---- 魂之三：Docker ----
@@ -75,6 +83,25 @@
     };
 
     spiceUSBRedirection.enable = true;  # VM 需要时直通 USB 设备
+  };
+
+  # 确保实例桥网络在 libvirtd 起来后自动拉起（挂到 br-vm）
+  systemd.services.libvirt-net-mirror-vm = {
+    description = "Start libvirt 'mirror-vm' network (bridge to br-vm)";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "libvirtd.service" "network.target" ];
+    requires = [ "libvirtd.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      for i in 1 2 3 4 5; do
+        ${pkgs.libvirt}/bin/virsh net-list --name 2>/dev/null | grep -q '^mirror-vm$' && break
+        ${pkgs.libvirt}/bin/virsh net-start mirror-vm 2>/dev/null || true
+        sleep 1
+      done
+    '';
   };
 
   # 虚拟化管理工具包
