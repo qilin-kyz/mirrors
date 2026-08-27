@@ -21,41 +21,45 @@
         then pkgs.linux_6_18
         else pkgs.linux_latest;
       customKernel = baseKernel.override {
+        # 对老内核符号"不存在也放行"：我们要 aggressively 裁剪子系统，
+        # 难免遇到新内核已删除的 Kconfig 符号（如 IRDA/WIMAX）。ignore
+        # 掉这些错误，让真正存在的符号生效。
+        ignoreConfigErrors = true;
         structuredExtraConfig = with lib.kernel; {
           # —— 9600X 之外的 CPU 支持：裁 ——
-          X86_INTEL_PSTATE = no;          # Intel 调速器，与本机无关
-          X86_AMD_PLATFORM_DEVICE = yes;  # AMD 平台设备（zen 必需）
+          X86_INTEL_PSTATE = lib.mkForce no;          # Intel 调速器，与本机无关
+          X86_AMD_PLATFORM_DEVICE = lib.mkForce yes;  # AMD 平台设备（zen 必需）
 
           # —— 无线/蓝牙/红外：这台机器没有这些器官 ——
-          WLAN = no;
-          WIRELESS = no;
-          BT = no;
-          IRDA = no;
-          NFC = no;
-          WIMAX = no;
+          WLAN = lib.mkForce no;
+          WIRELESS = lib.mkForce no;
+          BT = lib.mkForce no;
+          IRDA = lib.mkForce no;  # 老红外子系统，6.x 中可能已删除
+          NFC = lib.mkForce no;
+          WIMAX = lib.mkForce no;  # WiMAX 子系统已被主线移除
 
           # —— 音频子系统：整棵砍掉（黑名单只是不加载，这里是编译期消失）——
-          SOUND = no;
+          SOUND = lib.mkForce no;
 
           # —— 与本机无关的驱动族 ——
-          INFINIBAND = no;
-          SCSI_LOWLEVEL_PCMCIA = no;
-          PCMCIA = no;
-          FIREWIRE = no;
-          THUNDERBOLT = no;
+          INFINIBAND = lib.mkForce no;
+          SCSI_LOWLEVEL_PCMCIA = lib.mkForce no;
+          PCMCIA = lib.mkForce no;
+          FIREWIRE = lib.mkForce no;
+          THUNDERBOLT = lib.mkForce no;
 
           # —— 9600X 虚拟化宿主的调度取向 ——
-          HZ_1000 = yes;                  # 1ms tick：实例调度响应拉满
-          HZ = freeform "1000";
-          PREEMPT_VOLUNTARY = yes;        # 吞吐与延迟的平衡点（全抢占对宿主得不偿失）
-          SCHED_CORE = yes;               # SMT 兄弟核调度感知（9600X 12 线程）
-          CPU_FREQ_DEFAULT_GOV_PERFORMANCE = yes;  # 出生即满频
+          HZ_1000 = lib.mkForce yes;                  # 1ms tick：实例调度响应拉满
+          HZ = lib.mkForce (freeform "1000");
+          PREEMPT_VOLUNTARY = lib.mkForce yes;        # 吞吐与延迟的平衡点（全抢占对宿主得不偿失）
+          SCHED_CORE = lib.mkForce yes;               # SMT 兄弟核调度感知（9600X 12 线程）
+          CPU_FREQ_DEFAULT_GOV_PERFORMANCE = lib.mkForce yes;  # 出生即满频
 
           # —— 虚拟化加速件，编译进内核而非模块 ——
-          KVM = yes;
-          KVM_AMD = yes;
-          VHOST_NET = yes;                # virtio-net 内核态数据面，省用户态往返
-          VHOST_VSOCK = yes;
+          KVM = lib.mkForce yes;
+          KVM_AMD = lib.mkForce yes;
+          VHOST_NET = lib.mkForce yes;                # virtio-net 内核态数据面，省用户态往返
+          VHOST_VSOCK = lib.mkForce yes;
         };
       };
     in
