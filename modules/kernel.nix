@@ -28,29 +28,13 @@
           {
             name = "mirror-9600x-trim";
             patch = null;
+            # extraConfig 用 CONFIG_ 标准 Kconfig 符号片段覆盖通用内核模块选择；
+            # last-definition-wins 压过 common-config 的 =m。
+            # 注：NixOS 26.05 的 generate-config.pl 对部分符号（平台设备类、无线核心类等）
+            # 报 invalid config line，故此处只保留经 CI 验证可用的"编译进内核"项；
+            # 子系统编译期裁剪改由 boot.blacklistedKernelModules 兜底（不加载即不生效）。
             extraConfig = ''
-              # —— 注：CONFIG_X86_INTEL_PSTATE / CONFIG_X86_AMD_PLATFORM_DEVICE
-              # 在 6.18 的 NixOS generate-config.pl 校验下报 invalid config line
-              # （平台设备符号校验怪癖，非符号真的不存在），本机 9600X 桌面
-              # 也不需要 APD/I2C 平台设备，故两者都不设。
-
-              # —— 无线/蓝牙：这台机器没有这些器官 ——
-              # 注：CONFIG_WLAN/CONFIG_IRDA/CONFIG_WIMAX 在 6.18 已移除，不再设置
-              CONFIG_WIRELESS=n
-              CONFIG_BT=n
-              CONFIG_NFC=n
-
-              # —— 音频子系统：整棵砍掉 ——
-              CONFIG_SOUND=n
-
-              # —— 与本机无关的驱动族 ——
-              CONFIG_INFINIBAND=n
-              CONFIG_SCSI_LOWLEVEL_PCMCIA=n
-              CONFIG_PCMCIA=n
-              CONFIG_FIREWIRE=n
-              CONFIG_THUNDERBOLT=n
-
-              # —— 9600X 虚拟化宿主的调度取向 ——
+              # —— 9600X 虚拟化宿主的调度取向（编译进内核）——
               CONFIG_HZ_1000=y
               CONFIG_PREEMPT_VOLUNTARY=y
               CONFIG_SCHED_CORE=y
