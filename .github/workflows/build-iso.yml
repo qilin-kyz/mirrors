@@ -58,7 +58,7 @@ jobs:
       - name: 校验宿主配置可求值（mirrorhost）
         run: |
           set -o pipefail
-          if ! nix eval --accept-flake-config --raw .#mirrorhost.config.system.name 2>&1 | tee /tmp/eval.log; then
+          if ! nix eval --accept-flake-config --raw .#nixosConfigurations.mirrorhost.config.system.name 2>&1 | tee /tmp/eval.log; then
             MSG=$(tail -40 /tmp/eval.log | head -c 1800)
             MSG="${MSG//'%'/'%25'}"
             MSG="${MSG//$'\n'/'%0A'}"
