@@ -13,7 +13,8 @@
     # 禁止改成 nixos-unstable —— 这不是建议，是系统契约。
     # 升级方式：nix flake update（跟随下一个稳定版）→ 构建 → 测试 → 切换，
     # 出问题 nixos-rebuild --rollback 一秒回到从前。
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    # 注：25.11 已 EOL（冒烟测试启动警告实测），现跟随 26.05 稳定分支。
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     # 注：若 6.18 尚未进入该稳定分支，modules/kernel.nix 中有回退方案。
   };
 

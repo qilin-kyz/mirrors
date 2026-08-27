@@ -43,10 +43,14 @@ let
   '';
 in
 {
+  # 安装环境与目标系统共用同一颗 9600X 定制内核（镜座）。
+  # 首轮冒烟测试实测：不导入则安装盘跑默认 6.12，定制内核压根没编译。
+  imports = [ ../../modules/kernel.nix ];
+
   # ---- ISO 身份证 ----
-  # 文件名即发行名。若个别构建链对非 ASCII 文件名有意见，
-  # 改为 "jing-0.1-DEMO.iso" 构建后人工重命名即可。
-  isoImage.isoName = lib.mkForce "镜-0.1-DEMO.iso";
+  # 25.11 起文件名由 isoBaseName 拼成（isoName mkForce 实测不生效），
+  # 若构建链对非 ASCII 有意见，改 "jing-0.1-DEMO" 后人工重命名。
+  isoImage.isoBaseName = lib.mkForce "镜-0.1-DEMO";
   isoImage.volumeID = lib.mkForce "JING-01-DEMO";
   isoImage.makeEfiBootable = true;
   isoImage.makeUsbBootable = true;
