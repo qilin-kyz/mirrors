@@ -55,9 +55,12 @@ in
   isoImage.isoBaseName = lib.mkForce "MirrorOS-0.1-DEMO";
   isoImage.volumeID = lib.mkForce "JING-01-DEMO";
   # ---- 仅 UEFI 引导（用户要求：去掉 legacy BIOS 与 dd 混合启动） ----
+  # 基座 installation-cd-base.nix 默认 makeUsbBootable=true，必须用 mkForce 压过，
+  # 否则与 makeEfiBootable=true 同优先级定义冲突。makeBiosBootable 基座无定义，
+  # 直接用默认值(false 覆盖)即可。
   isoImage.makeEfiBootable = true;
-  isoImage.makeBiosBootable = false;   # 去掉 El Torito BIOS (isolinux) 启动
-  isoImage.makeUsbBootable = false;    # 去掉 hybrid MBR / dd 到 U 盘启动
+  isoImage.makeBiosBootable = false;        # 去掉 El Torito BIOS (isolinux) 启动
+  isoImage.makeUsbBootable = lib.mkForce false;  # 强压基座默认 true，去掉 hybrid MBR / dd 启动
 
   # 离线安装的生命线：flake 源码与 nixpkgs 全部随盘进 store
   isoImage.storeContents = [ self ];
