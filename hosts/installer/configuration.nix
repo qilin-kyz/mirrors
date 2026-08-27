@@ -48,9 +48,11 @@ in
   imports = [ ../../modules/kernel.nix ];
 
   # ---- ISO 身份证 ----
-  # 25.11 起文件名由 isoBaseName 拼成（isoName mkForce 实测不生效），
-  # 若构建链对非 ASCII 有意见，改 "jing-0.1-DEMO" 后人工重命名。
-  isoImage.isoBaseName = lib.mkForce "镜-0.1-DEMO";
+  # 25.11 起文件名由 isoBaseName 拼成（isoName mkForce 实测不生效）。
+  # 必须用 ASCII：NixOS 构建链会丢弃文件名首字节的非 ASCII 字符
+  # （实测 "镜-0.1-DEMO" → 发布产物变成 "-0.1-DEMO.iso"），且中文
+  # 文件名在 U 盘刻录/启动菜单里也易被各类工具改坏。中文名由用户下载后自取。
+  isoImage.isoBaseName = lib.mkForce "MirrorOS-0.1-DEMO";
   isoImage.volumeID = lib.mkForce "JING-01-DEMO";
   isoImage.makeEfiBootable = true;
   isoImage.makeUsbBootable = true;
