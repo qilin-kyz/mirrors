@@ -29,6 +29,11 @@
     ../../modules/webui.nix
   ];
 
+  # ---- 放行 unfree：NVIDIA 闭源驱动与 CUDA 工具链均属 unfree ----
+  # 本宿主须跑 NVIDIA 显卡（含 GPU 直通、nvtop 监控、计算型 CUDA），
+  # 不放开则 nix eval / nixos-rebuild 会因 unfree license 拒绝求值。
+  nixpkgs.config.allowUnfree = true;
+
   networking.hostName = "mirrorhost";
   time.timeZone = "Asia/Shanghai";
 
