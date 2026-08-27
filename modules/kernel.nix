@@ -29,9 +29,10 @@
             name = "mirror-9600x-trim";
             patch = null;
             extraConfig = ''
-              # —— 9600X 之外的 CPU 支持：裁 ——
-              # 注：CONFIG_X86_INTEL_PSTATE 在 6.18 已重构/更名，不再设置（本机是 Zen5）
-              CONFIG_X86_AMD_PLATFORM_DEVICE=y
+              # —— 注：CONFIG_X86_INTEL_PSTATE / CONFIG_X86_AMD_PLATFORM_DEVICE
+              # 在 6.18 的 NixOS generate-config.pl 校验下报 invalid config line
+              # （平台设备符号校验怪癖，非符号真的不存在），本机 9600X 桌面
+              # 也不需要 APD/I2C 平台设备，故两者都不设。
 
               # —— 无线/蓝牙：这台机器没有这些器官 ——
               # 注：CONFIG_WLAN/CONFIG_IRDA/CONFIG_WIMAX 在 6.18 已移除，不再设置
