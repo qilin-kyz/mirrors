@@ -55,10 +55,12 @@ jobs:
       # 宿主配置（mirrorhost）不被 ISO 构建覆盖，单独的求值校验能提前
       # 暴露 modules/*.nix 的语法/选项错误，避免把坏配置带进真机首次 switch。
       # 放在构建之前：若有错，几秒内就挂，不浪费 20+ 分钟构建时长。
+      # 用 config.system.build.toplevel.drvPath 强制完整求值（只求值、不构建），
+      # 触发所有模块的选项/类型检查，而非只查一个叶子属性（惰性求值会漏错）。
       - name: 校验宿主配置可求值（mirrorhost）
         run: |
           set -o pipefail
-          if ! nix eval --accept-flake-config --raw .#nixosConfigurations.mirrorhost.config.system.name 2>&1 | tee /tmp/eval.log; then
+          if ! nix eval --accept-flake-config --raw .#nixosConfigurations.mirrorhost.config.system.build.toplevel.drvPath 2>&1 | tee /tmp/eval.log; then
             MSG=$(tail -40 /tmp/eval.log | head -c 1800)
             MSG="${MSG//'%'/'%25'}"
             MSG="${MSG//$'\n'/'%0A'}"
@@ -66,7 +68,7 @@ jobs:
             echo "::error::宿主配置求值失败:$MSG"
             exit 1
           fi
-          echo "mirrorhost 配置求值通过 ✅"
+          echo "mirrorhost 配置完整求值通过 ✅"
 
       # 失败时把错误尾部写进工作流注解（annotations），
       # 公开仓库的注解无需登录即可经 API 读取 —— 调试闭环自动化。
