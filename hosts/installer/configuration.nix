@@ -97,6 +97,9 @@ in
   services.getty.autologinUser = lib.mkForce "root";
   users.users.root.initialPassword = lib.mkForce "mirror";
 
-  # 安装介质自身无需联网也能完成全流程（DHCP 有则用）
-  networking.useDHCP = true;
+  # 安装介质自身无需联网也能完成全流程（DHCP 有则用）。
+  # 安装盘基座默认启用 NetworkManager 并把 useDHCP 压成 false，
+  # 两处都要 mkForce 掰回来，否则求值期冲突（三轮 CI 实测）。
+  networking.useDHCP = lib.mkForce true;
+  networking.networkmanager.enable = lib.mkForce false;
 }
