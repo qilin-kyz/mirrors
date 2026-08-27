@@ -94,7 +94,7 @@ def list_instances():
             {"engine": "incus", "name": "gw-router", "state": "running",
              "info": "Debian 13 (container)"},
             {"engine": "incus", "name": "win11-work", "state": "stopped",
-             "info": "Windows 11 VM (GPU passthrough)"},
+             "info": "Windows 11 VM (KVM/QEMU)"},
             {"engine": "qemu", "name": "freebsd-nas", "state": "running",
              "info": "KVM/QEMU · installed from /var/lib/mirror/iso"},
             {"engine": "docker", "name": "ollama-gpu", "state": "running",

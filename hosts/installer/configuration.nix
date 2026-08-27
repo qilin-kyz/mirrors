@@ -54,8 +54,10 @@ in
   # 文件名在 U 盘刻录/启动菜单里也易被各类工具改坏。中文名由用户下载后自取。
   isoImage.isoBaseName = lib.mkForce "MirrorOS-0.1-DEMO";
   isoImage.volumeID = lib.mkForce "JING-01-DEMO";
+  # ---- 仅 UEFI 引导（用户要求：去掉 legacy BIOS 与 dd 混合启动） ----
   isoImage.makeEfiBootable = true;
-  isoImage.makeUsbBootable = true;
+  isoImage.makeBiosBootable = false;   # 去掉 El Torito BIOS (isolinux) 启动
+  isoImage.makeUsbBootable = false;    # 去掉 hybrid MBR / dd 到 U 盘启动
 
   # 离线安装的生命线：flake 源码与 nixpkgs 全部随盘进 store
   isoImage.storeContents = [ self ];

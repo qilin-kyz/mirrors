@@ -61,14 +61,13 @@
 
   # ---- 驱动白名单（镜座） ----
   # 注：编译期定制（KVM/VHOST 编译进内核）推迟到真机 znver5 重编；
-  # 此处显式加载 KVM/4090 直通所需模块，确保安装盘开箱即可虚拟化。
+  # 此处显式加载 KVM 虚拟化所需模块，确保安装盘开箱即可虚拟化。
   boot.kernelModules = [
     "kvm-amd"          # 9600X SVM 虚拟化（拉入 kvm 依赖）
     "vhost_net"        # 实例网络 virtio 加速
     "vhost_vsock"      # 实例 vsock 通道
     "r8169"            # Realtek RTL8111  1GbE（宿主管理口）
     "r8152"            # Realtek RTL8152B 2.5GbE USB（实例专用对外口）
-    "vfio-pci"         # 备用的 PCI 直通通道（需要时整机直通显卡）
     "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"  # 详见 nvidia.nix
   ];
 

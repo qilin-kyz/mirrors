@@ -14,7 +14,7 @@
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usb_storage" "usbhid" "sd_mod" "usbhid" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" "vfio-pci" "r8169" "r8152" ];
+  boot.kernelModules = [ "kvm-amd" "r8169" "r8152" ];
 
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda";

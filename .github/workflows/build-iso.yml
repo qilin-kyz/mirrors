@@ -72,6 +72,23 @@ jobs:
 
       # 失败时把错误尾部写进工作流注解（annotations），
       # 公开仓库的注解无需登录即可经 API 读取 —— 调试闭环自动化。
+
+      # 安装盘（installer）配置不被 mirrorhost 覆盖，但 ISO 构建会用到；
+      # 单独求值校验可提前暴露 installer 配置里的选项/类型错误，
+      # 避免 20+ 分钟构建跑到一半才因选项写错而失败。
+      - name: 校验安装盘配置可求值（installer）
+        run: |
+          set -o pipefail
+          if ! nix eval --accept-flake-config --raw .#nixosConfigurations.installer.config.system.build.isoImage.drvPath 2>&1 | tee /tmp/eval-iso.log; then
+            MSG=$(tail -40 /tmp/eval-iso.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::安装盘配置求值失败:$MSG"
+            exit 1
+          fi
+          echo "installer ISO 配置完整求值通过 ✅"
+
       - name: 构建 ISO（镜 0.1-DEMO）
         run: |
           set -o pipefail
