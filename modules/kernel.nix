@@ -9,9 +9,11 @@
 
 {
   # ---- Linux 6.18 LTS：9600X 专属内核，不是通用内核 ----
-  # 在通用 6.18 之上叠加 structuredExtraConfig：
-  # 不为这台机器服务的子系统，直接从内核二进制里消失
-  # （不是"不加载"，是"不存在"——攻击面与体积同步归零）。
+  # 用 kernelPatches + extraConfig（字符串片段）覆盖通用内核的模块选择：
+  #   - 字符串片段不参与 NixOS 选项优先级判定 → 不与 common-config 打架
+  #   - last-definition-wins → 我们的 =n/=y 压过通用内核的 =m
+  #   - 用 CONFIG_ 前缀标准 Kconfig 符号，序列化器不会读坏
+  #   - ignoreConfigErrors：新内核已删除的老符号（IRDA/WIMAX）直接忽略
   # 注意：必须对 linux_x_yy 内核本体 override，再用 linuxPackagesFor
   # 重新生成包集 —— 直接 .override 包集会在求值期炸掉（首轮 CI 实测）。
   boot.kernelPackages =
@@ -21,45 +23,48 @@
         then pkgs.linux_6_18
         else pkgs.linux_latest;
       customKernel = baseKernel.override {
-        # 对老内核符号"不存在也放行"：我们要 aggressively 裁剪子系统，
-        # 难免遇到新内核已删除的 Kconfig 符号（如 IRDA/WIMAX）。ignore
-        # 掉这些错误，让真正存在的符号生效。
         ignoreConfigErrors = true;
-        structuredExtraConfig = with lib.kernel; {
-          # —— 9600X 之外的 CPU 支持：裁 ——
-          X86_INTEL_PSTATE = lib.mkForce no;          # Intel 调速器，与本机无关
-          X86_AMD_PLATFORM_DEVICE = lib.mkForce yes;  # AMD 平台设备（zen 必需）
+        kernelPatches = [
+          {
+            name = "mirror-9600x-trim";
+            patch = null;
+            extraConfig = ''
+              # —— 9600X 之外的 CPU 支持：裁 ——
+              CONFIG_X86_INTEL_PSTATE=n
+              CONFIG_X86_AMD_PLATFORM_DEVICE=y
 
-          # —— 无线/蓝牙/红外：这台机器没有这些器官 ——
-          WLAN = lib.mkForce no;
-          WIRELESS = lib.mkForce no;
-          BT = lib.mkForce no;
-          IRDA = lib.mkForce no;  # 老红外子系统，6.x 中可能已删除
-          NFC = lib.mkForce no;
-          WIMAX = lib.mkForce no;  # WiMAX 子系统已被主线移除
+              # —— 无线/蓝牙/红外：这台机器没有这些器官 ——
+              CONFIG_WLAN=n
+              CONFIG_WIRELESS=n
+              CONFIG_BT=n
+              CONFIG_IRDA=n
+              CONFIG_NFC=n
+              CONFIG_WIMAX=n
 
-          # —— 音频子系统：整棵砍掉（黑名单只是不加载，这里是编译期消失）——
-          SOUND = lib.mkForce no;
+              # —— 音频子系统：整棵砍掉 ——
+              CONFIG_SOUND=n
 
-          # —— 与本机无关的驱动族 ——
-          INFINIBAND = lib.mkForce no;
-          SCSI_LOWLEVEL_PCMCIA = lib.mkForce no;
-          PCMCIA = lib.mkForce no;
-          FIREWIRE = lib.mkForce no;
-          THUNDERBOLT = lib.mkForce no;
+              # —— 与本机无关的驱动族 ——
+              CONFIG_INFINIBAND=n
+              CONFIG_SCSI_LOWLEVEL_PCMCIA=n
+              CONFIG_PCMCIA=n
+              CONFIG_FIREWIRE=n
+              CONFIG_THUNDERBOLT=n
 
-          # —— 9600X 虚拟化宿主的调度取向 ——
-          HZ_1000 = lib.mkForce yes;                  # 1ms tick：实例调度响应拉满
-          PREEMPT_VOLUNTARY = lib.mkForce yes;        # 吞吐与延迟的平衡点（全抢占对宿主得不偿失）
-          SCHED_CORE = lib.mkForce yes;               # SMT 兄弟核调度感知（9600X 12 线程）
-          CPU_FREQ_DEFAULT_GOV_PERFORMANCE = lib.mkForce yes;  # 出生即满频
+              # —— 9600X 虚拟化宿主的调度取向 ——
+              CONFIG_HZ_1000=y
+              CONFIG_PREEMPT_VOLUNTARY=y
+              CONFIG_SCHED_CORE=y
+              CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
 
-          # —— 虚拟化加速件，编译进内核而非模块 ——
-          KVM = lib.mkForce yes;
-          KVM_AMD = lib.mkForce yes;
-          VHOST_NET = lib.mkForce yes;                # virtio-net 内核态数据面，省用户态往返
-          VHOST_VSOCK = lib.mkForce yes;
-        };
+              # —— 虚拟化加速件，编译进内核而非模块 ——
+              CONFIG_KVM=y
+              CONFIG_KVM_AMD=y
+              CONFIG_VHOST_NET=y
+              CONFIG_VHOST_VSOCK=y
+            '';
+          }
+        ];
       };
     in
     pkgs.linuxPackagesFor customKernel;
