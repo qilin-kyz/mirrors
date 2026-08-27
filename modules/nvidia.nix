@@ -36,11 +36,12 @@
   };
 
   # Docker / Incus GPU 直通（CDI 方式，docker run --gpus / incus gpu 设备）
-  hardware.nvidia-container-toolkit.enable = true;
-
+  # 注：26.05 起 hardware.nvidia-container-toolkit 模块选项已被移除，
+  # 改为直接安装包，由用户/镜像脚本运行 `nvidia-ctk cdi generate` 生成 CDI 规格。
   environment.systemPackages = with pkgs; [
-    nvtopPackages.nvidia   # GPU 占用监控
+    nvtopPackages.nvidia       # GPU 占用监控
     cudaPackages.cudatoolkit  # CUDA 工具链（计算型实例需要）
+    nvidia-container-toolkit  # nvidia-ctk / 容器运行时（CDI 直通需手动生成规格）
   ];
 
   # 给 libvirtd/Incus 的 GPU 设备可见性兜底

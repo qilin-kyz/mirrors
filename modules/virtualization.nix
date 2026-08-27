@@ -10,6 +10,19 @@
 
 { config, pkgs, lib, ... }:
 
+let
+  # libvirt 网络在 26.05 已不再有 virtualisation.libvirtd.networks 声明式选项，
+  # 改为把网络 XML 落到 /var/lib/libvirt/qemu/networks/。这里以 writeText 固化
+  # 一个「桥接到已建 br-vm」的网络（forward mode='bridge'，不接管 DHCP，
+  # 实例直接吃 br-vm 上游网段），再由下方 systemd 服务 net-define + net-start。
+  mirrorVmNetworkXml = pkgs.writeText "mirror-vm-network.xml" ''
+    <network>
+      <name>mirror-vm</name>
+      <forward mode="bridge"/>
+      <bridge name="br-vm"/>
+    </network>
+  '';
+in
 {
   virtualisation = {
     # ---- 魂之一：Incus ----
@@ -45,28 +58,17 @@
     # ---- 魂之二：KVM/QEMU（libvirt 管理） ----
     libvirtd = {
       enable = true;
-      onBoot = "ignore";          # 宿主导完电不自动拉起实例，避免风暴
+      onBoot = "ignore";          # 宿主拉电不自动拉起实例，避免风暴
       onShutdown = "shutdown";    # 宿主关机时优雅关闭实例（7x24 礼仪）
       qemu = {
         package = pkgs.qemu_kvm;
         runAsRoot = true;         # 直通场景省去权限博弈
         swtpm.enable = true;      # vTPM：Win11 类实例的前置条件
-        ovmf = {
-          enable = true;          # UEFI 固件
-          packages = [ (pkgs.OVMFFull.override {
-            secureBoot = true;
-            tpmSupport = true;
-          }).fd ];
-        };
+        # 注：qemu.ovmf 在该版本已被移除（OVMF 固件随 QEMU 默认就位），
+        # 故不再显式配置，断言会拒绝任何非空设置。
       };
-      # 实例上联：直接挂到设计中的 2.5G 实例桥 br-vm
+      # 实例上联：通过下方 mirror-vm 网络挂到 2.5G 实例桥 br-vm
       # （不再走 virbr0 NAT —— 实例流量应独立出网，见 network.nix）
-      networks = {
-        mirror-vm = {
-          bridge = "br-vm";
-          forward.mode = "bridge";   # 复用 systemd-networkd 已建的 br-vm
-        };
-      };
     };
 
     # ---- 魂之三：Docker ----
@@ -85,22 +87,45 @@
     spiceUSBRedirection.enable = true;  # VM 需要时直通 USB 设备
   };
 
-  # 确保实例桥网络在 libvirtd 起来后自动拉起（挂到 br-vm）
+  # 把 mirror-vm 网络（桥接 br-vm）注入 libvirt：定义→拉起→开机自启。
+  # 用 net-info 做幂等判断，重复执行不会报错；并等待上联桥 br-vm 就绪。
   systemd.services.libvirt-net-mirror-vm = {
-    description = "Start libvirt 'mirror-vm' network (bridge to br-vm)";
+    description = "Define & start libvirt 'mirror-vm' network (bridge to br-vm)";
     wantedBy = [ "multi-user.target" ];
-    after = [ "libvirtd.service" "network.target" ];
+    after = [ "libvirtd.service" "systemd-networkd.service" "network.target" ];
     requires = [ "libvirtd.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
     };
     script = ''
-      for i in 1 2 3 4 5; do
-        ${pkgs.libvirt}/bin/virsh net-list --name 2>/dev/null | grep -q '^mirror-vm$' && break
-        ${pkgs.libvirt}/bin/virsh net-start mirror-vm 2>/dev/null || true
+      VMNET_XML=${mirrorVmNetworkXml}
+      VIRSH=${pkgs.libvirt}/bin/virsh
+
+      # 等待 libvirtd 守护就绪
+      for i in $(seq 1 20); do
+        $VIRSH connect qemu:///system >/dev/null 2>&1 && break
         sleep 1
       done
+
+      # 等待上联桥 br-vm 就绪（由 systemd-networkd 建立，见 network.nix）
+      for i in $(seq 1 20); do
+        ${pkgs.iproute2}/bin/ip link show br-vm >/dev/null 2>&1 && break
+        sleep 1
+      done
+
+      # 若尚未定义则定义（幂等）
+      if ! $VIRSH net-info mirror-vm >/dev/null 2>&1; then
+        $VIRSH net-define "$VMNET_XML" || true
+      fi
+
+      # 若未激活则拉起
+      if ! $VIRSH net-info mirror-vm 2>/dev/null | grep -q "Active:.*yes"; then
+        $VIRSH net-start mirror-vm || true
+      fi
+
+      # 设为开机自启
+      $VIRSH net-autostart mirror-vm || true
     '';
   };
 

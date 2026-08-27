@@ -11,8 +11,7 @@
 { config, pkgs, lib, ... }:
 
 {
-  # ---- auditd：全命令审计 ----
-  security.auditd.enable = true;
+  # ---- audit：全命令审计（26.05 起 security.auditd 已并入 security.audit） ----
   security.audit = {
     enable = true;
     backlogLimit = 8192;        # 突发命令风暴也不丢记录
