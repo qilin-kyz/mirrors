@@ -8,17 +8,18 @@
 { config, pkgs, lib, ... }:
 
 {
-  # ---- Linux 6.18 LTS：9600X 专属内核，不是通用内核 ----
-  # 用 structuredExtraConfig（NixOS 原生、按符号逐条覆盖通用内核配置）：
-  #   - 符号名不带 CONFIG_ 前缀，值用 lib.kernel.yes/no（裸值，不包 mkForce）
-  #   - mkForce 会把 kernelFlag 包成 override 值，序列化 stage 读坏 .config
-  #     （build #7/#8 实测：structuredExtraConfig+mkForce → "Error in reading
-  #      or end of file"；裸值则可正常生成）
-  #   - ignoreConfigErrors=true：新内核已删除/改名老符号直接忽略，不报错
-  #   - 只"启用"必要项（=y），不用 =n 去禁用（禁用会触发 common-config 冲突）；
-  #     子系统裁剪改由 boot.blacklistedKernelModules 运行期兜底
-  # 注意：必须对 linux_x_yy 内核本体 override，再用 linuxPackagesFor
-  # 重新生成包集 —— 直接 .override 包集会在求值期炸掉（首轮 CI 实测）。
+  # ---- Linux 6.18 LTS：ISO 阶段用官方二进制 6.18 内核 ----
+  # 设计取舍（与 .github/workflows/build-iso.yml 注释一致）：
+  #   ISO 只是"搬运工"，用官方 linuxPackages_6_18 二进制内核即可秒级出盘且稳定，
+  #   编译期极致调优（HZ_1000 / PREEMPT_VOLUNTARY / SCHED_CORE /
+  #   CPU_FREQ_DEFAULT_GOV_PERFORMANCE / KVM·VHOST 编译进内核）在真机阶段
+  #   用 znver5 全量重编（hosts/mirrorhost/configuration.nix 改回 znver5 后
+  #   nixos-rebuild switch）随镜像一并生效。
+  #   注：NixOS 26.05 + 6.18 下 structuredExtraConfig / kernelPatches.extraConfig
+  #   经 generate-config.pl 驱动 make config 时，对前述符号稳定报
+  #   "Error in reading or end of file"（build #7/#8/#13 实测），故编译期定制
+  #   暂不在 ISO 阶段进行。运行期调优（下方 kernelParams / sysctl / 模块黑白名单
+  #   / 微码）不依赖内核重编，安装盘与宿主系统表现一致。
   boot.kernelPackages =
     let
       baseKernel =
@@ -27,24 +28,8 @@
         else if pkgs ? linux_6_19
         then pkgs.linux_6_19
         else pkgs.linux_latest;
-      customKernel = baseKernel.override {
-        ignoreConfigErrors = true;
-        structuredExtraConfig = {
-          # —— 9600X 虚拟化宿主的调度取向（编译进内核）——
-          HZ_1000 = lib.kernel.yes;
-          PREEMPT_VOLUNTARY = lib.kernel.yes;
-          SCHED_CORE = lib.kernel.yes;
-          CPU_FREQ_DEFAULT_GOV_PERFORMANCE = lib.kernel.yes;
-
-          # —— 虚拟化加速件，编译进内核而非模块 ——
-          KVM = lib.kernel.yes;
-          KVM_AMD = lib.kernel.yes;
-          VHOST_NET = lib.kernel.yes;
-          VHOST_VSOCK = lib.kernel.yes;
-        };
-      };
     in
-    pkgs.linuxPackagesFor customKernel;
+    pkgs.linuxPackagesFor baseKernel;
 
   # ---- Zen 5 (9600X) 运行期优化：从开机第一秒就贴着流水线走 ----
   boot.kernelParams = [
@@ -75,8 +60,12 @@
   };
 
   # ---- 驱动白名单（镜座） ----
-  # 注：KVM/VHOST 已编译进内核（见上方 structuredExtraConfig），此处不再重复
+  # 注：编译期定制（KVM/VHOST 编译进内核）推迟到真机 znver5 重编；
+  # 此处显式加载 KVM/4090 直通所需模块，确保安装盘开箱即可虚拟化。
   boot.kernelModules = [
+    "kvm-amd"          # 9600X SVM 虚拟化（拉入 kvm 依赖）
+    "vhost_net"        # 实例网络 virtio 加速
+    "vhost_vsock"      # 实例 vsock 通道
     "r8169"            # Realtek RTL8111  1GbE（宿主管理口）
     "r8152"            # Realtek RTL8152B 2.5GbE USB（实例专用对外口）
     "vfio-pci"         # 备用的 PCI 直通通道（需要时整机直通显卡）
