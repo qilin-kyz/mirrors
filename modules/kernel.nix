@@ -9,11 +9,14 @@
 
 {
   # ---- Linux 6.18 LTS：9600X 专属内核，不是通用内核 ----
-  # 用 kernelPatches + extraConfig（字符串片段）覆盖通用内核的模块选择：
-  #   - 字符串片段不参与 NixOS 选项优先级判定 → 不与 common-config 打架
-  #   - last-definition-wins → 我们的 =n/=y 压过通用内核的 =m
-  #   - 用 CONFIG_ 前缀标准 Kconfig 符号，序列化器不会读坏
-  #   - ignoreConfigErrors：新内核已删除的老符号（IRDA/WIMAX）直接忽略
+  # 用 structuredExtraConfig（NixOS 原生、按符号逐条覆盖通用内核配置）：
+  #   - 符号名不带 CONFIG_ 前缀，值用 lib.kernel.yes/no（裸值，不包 mkForce）
+  #   - mkForce 会把 kernelFlag 包成 override 值，序列化 stage 读坏 .config
+  #     （build #7/#8 实测：structuredExtraConfig+mkForce → "Error in reading
+  #      or end of file"；裸值则可正常生成）
+  #   - ignoreConfigErrors=true：新内核已删除/改名老符号直接忽略，不报错
+  #   - 只"启用"必要项（=y），不用 =n 去禁用（禁用会触发 common-config 冲突）；
+  #     子系统裁剪改由 boot.blacklistedKernelModules 运行期兜底
   # 注意：必须对 linux_x_yy 内核本体 override，再用 linuxPackagesFor
   # 重新生成包集 —— 直接 .override 包集会在求值期炸掉（首轮 CI 实测）。
   boot.kernelPackages =
@@ -21,33 +24,24 @@
       baseKernel =
         if pkgs ? linux_6_18
         then pkgs.linux_6_18
+        else if pkgs ? linux_6_19
+        then pkgs.linux_6_19
         else pkgs.linux_latest;
       customKernel = baseKernel.override {
         ignoreConfigErrors = true;
-        kernelPatches = [
-          {
-            name = "mirror-9600x-trim";
-            patch = null;
-            # extraConfig 用 CONFIG_ 标准 Kconfig 符号片段覆盖通用内核模块选择；
-            # last-definition-wins 压过 common-config 的 =m。
-            # 注：NixOS 26.05 的 generate-config.pl 对部分符号（平台设备类、无线核心类等）
-            # 报 invalid config line，故此处只保留经 CI 验证可用的"编译进内核"项；
-            # 子系统编译期裁剪改由 boot.blacklistedKernelModules 兜底（不加载即不生效）。
-            extraConfig = ''
-              # —— 9600X 虚拟化宿主的调度取向（编译进内核）——
-              CONFIG_HZ_1000=y
-              CONFIG_PREEMPT_VOLUNTARY=y
-              CONFIG_SCHED_CORE=y
-              CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
+        structuredExtraConfig = {
+          # —— 9600X 虚拟化宿主的调度取向（编译进内核）——
+          HZ_1000 = lib.kernel.yes;
+          PREEMPT_VOLUNTARY = lib.kernel.yes;
+          SCHED_CORE = lib.kernel.yes;
+          CPU_FREQ_DEFAULT_GOV_PERFORMANCE = lib.kernel.yes;
 
-              # —— 虚拟化加速件，编译进内核而非模块 ——
-              CONFIG_KVM=y
-              CONFIG_KVM_AMD=y
-              CONFIG_VHOST_NET=y
-              CONFIG_VHOST_VSOCK=y
-            '';
-          }
-        ];
+          # —— 虚拟化加速件，编译进内核而非模块 ——
+          KVM = lib.kernel.yes;
+          KVM_AMD = lib.kernel.yes;
+          VHOST_NET = lib.kernel.yes;
+          VHOST_VSOCK = lib.kernel.yes;
+        };
       };
     in
     pkgs.linuxPackagesFor customKernel;
