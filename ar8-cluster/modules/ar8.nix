@@ -235,9 +235,13 @@ in
     # ⚠️ environment.systemPackages 在本模块只允许出现一次（NixOS 同模块内重复
     # 定义同一选项会报 "already defined"）。k3s 与 AR8 包都必须并到这里，不能各写一处。
     # 云端 nix eval 抓出过这个错误：曾在第 235 行（k3s）与第 299 行（AR8 包）重复定义。
+    #
+    # ⚠️ 类型陷阱：systemPackages 是 listOf package，不能用 lib.mkIf 拼 `++` ——
+    # lib.mkIf 返回惰性 if 结构（非 list），`++` 求值会报 "expected a list but
+    # found a set: { _type = "if"; ... }"。要用 lib.optionals（返回真 list）。
     environment.systemPackages =
-      lib.mkIf cfg.workload.kubernetes.enable [ pkgs.k3s ]
-      ++ lib.mkIf cfg.demo.enable [ cfg.package ];
+      lib.optionals cfg.workload.kubernetes.enable [ pkgs.k3s ]
+      ++ lib.optionals cfg.demo.enable [ cfg.package ];
 
     # k3s 多节点所需端口（NixOS 防火墙默认全拒，必须显式放开）：
     #   6443/TCP  apiserver；2379/2380/TCP  etcd（多 server HA）；
