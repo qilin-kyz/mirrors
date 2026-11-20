@@ -26,26 +26,16 @@
       overlay = final: prev: {
         ar8 = final.callPackage ./pkgs/ar8 { };
       };
-    in
-    {
-      # ---- 包输出（nix build / nix run）----
-      packages = forAllSystems ({ system, pkgs }:
-        let
-          p = pkgs.extend overlay;
-        in
-        {
-          ar8 = p.ar8;
-          default = p.ar8;
-        });
 
-      # ---- overlay：让 nixpkgs 里出现 pkgs.ar8 ----
-      overlays.default = overlay;
-
-      # ---- NixOS 系统配置 ----
+      # ---- NixOS 系统配置变体工厂 ----
       #
       # 三版本变体：同一份 host 配置 + 不同的 services.ar8.systemProfile。
       # 三个版本共用同一套 FSM / 真值源 / AR8 包，只换调度策略与系统层参数。
       # 命名规则：<host>-<profile>，baseline 变体不带后缀（保持向后兼容）。
+      #
+      # ⚠️ 必须放在 let 块：nixosConfigurations 要引用它，而 outputs 返回的
+      # attrset 不是 rec，键之间不能互引（放那里会 undefined variable 'mkVariants'）。
+      # 这是云端 nix eval 抓出来的作用域错误，一开始括号配平查不到。
       mkVariants = hostName: hostFile: {
         "${hostName}" = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -71,6 +61,20 @@
           ];
         };
       };
+    in
+    {
+      # ---- 包输出（nix build / nix run）----
+      packages = forAllSystems ({ system, pkgs }:
+        let
+          p = pkgs.extend overlay;
+        in
+        {
+          ar8 = p.ar8;
+          default = p.ar8;
+        });
+
+      # ---- overlay：让 nixpkgs 里出现 pkgs.ar8 ----
+      overlays.default = overlay;
 
       nixosConfigurations =
         (mkVariants "001-thinkpad-x270" ./hosts/001-thinkpad-x270.nix)
