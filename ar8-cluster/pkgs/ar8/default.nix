@@ -58,7 +58,11 @@ stdenv.mkDerivation {
       !(type == "directory" && (base == "__pycache__" || base == "state"))
       && !(lib.hasSuffix ".pyc" base)
       && !(lib.hasSuffix ".log" base)
-      && !(lib.hasPrefix "bench-" base)   # 基准运行时产物，不进 store
+      # 只排除基准的 .json 运行时产物（不进 store）。⚠️ 不能用 hasPrefix "bench-"：
+      # 那样会把 bench-profiles.py / bench-stats.py / bench-sensitivity.py 三个
+      # 源码也一起排除，installPhase 的 `install "$src/bench-profiles.py"` 就会
+      # 「文件不存在」而失败（云端 nix build 真抓出过这个错）。
+      && !(lib.hasPrefix "bench-" base && lib.hasSuffix ".json" base)
       && !(base == ".DS_Store");
   };
 
