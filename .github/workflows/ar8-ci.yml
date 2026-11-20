@@ -51,25 +51,42 @@ jobs:
       # 求值（惰性求值只查叶子属性会漏错）。
       # 注：ar8-cluster/flake.nix 的 nixpkgs.url 是官方 github:NixOS/nixpkgs/nixos-26.05，
       #     海外 CI 可直连；无 flake.lock 时 nix 会自动 fetch 并生成临时 lock。
+      # 失败时必须把错误写进 ::error:: 注解 —— 公开仓库的注解无需登录即可经 API
+      # 读取，这是无 admin 权限时拿到 nix 求值报错的唯一通道（mirrors/build-iso.yml
+      # 同款做法）。否则错误只会进需要 admin 权限的 job 日志，外面看不到。
       - name: 校验 NixOS 变体可求值
         working-directory: ar8-cluster
         run: |
           set -o pipefail
-          nix eval --accept-flake-config --raw \
-            .#nixosConfigurations.vm-ar8-node1.config.system.build.toplevel.drvPath
-          nix eval --accept-flake-config --raw \
-            .#nixosConfigurations.vm-ar8-node1-xnu-qos.config.system.build.toplevel.drvPath
-          nix eval --accept-flake-config --raw \
-            .#nixosConfigurations.vm-ar8-node1-oh-distributed.config.system.build.toplevel.drvPath
-          nix eval --accept-flake-config --raw \
-            .#nixosConfigurations.vm-ar8-node2.config.system.build.toplevel.drvPath
-          echo "变体完整求值通过（3 host × 3 profile，抽验 4 个）"
+          ok=1
+          for c in vm-ar8-node1 vm-ar8-node1-xnu-qos \
+                   vm-ar8-node1-oh-distributed vm-ar8-node2; do
+            if ! nix eval --accept-flake-config --raw \
+                 ".#nixosConfigurations.${c}.config.system.build.toplevel.drvPath" \
+                 2>&1 | tee /tmp/eval.log; then
+              MSG=$(tail -40 /tmp/eval.log | head -c 1800)
+              MSG="${MSG//'%'/'%25'}"
+              MSG="${MSG//$'\n'/'%0A'}"
+              MSG="${MSG//$'\r'/'%0D'}"
+              echo "::error::变体 ${c} 求值失败:${MSG}"
+              ok=0
+              break
+            fi
+          done
+          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 3 profile）"
 
       - name: 构建 AR8 包（含 install 自检）
         working-directory: ar8-cluster
         run: |
           set -o pipefail
-          nix build .#ar8 --accept-flake-config 2>&1 | tee /tmp/build.log
+          if ! nix build .#ar8 --accept-flake-config 2>&1 | tee /tmp/build.log; then
+            MSG=$(tail -30 /tmp/build.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::nix build .#ar8 失败:${MSG}"
+            exit 1
+          fi
           echo "=== AR8 包构建产物 ==="
           ls -R result/ 2>/dev/null | head -40
           echo "=== 包内自检：版本 + validate ==="
