@@ -1,0 +1,668 @@
+{
+  "config": {
+    "shards": 48,
+    "trials": 7,
+    "seed": 20261120,
+    "nodes": 8,
+    "tiersMix": {
+      "interactive": 0.2,
+      "default": 0.3,
+      "utility": 0.3,
+      "background": 0.2
+    },
+    "failureInjection": false
+  },
+  "workload": {
+    "tierCounts": {
+      "background": 13,
+      "utility": 10,
+      "default": 16,
+      "interactive": 9
+    }
+  },
+  "main": {
+    "nixos-baseline": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006003,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00629,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006,
+          "reassign": 13
+        },
+        {
+          "seed": 20284877,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006695,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006448,
+          "reassign": 15
+        },
+        {
+          "seed": 20300715,
+          "makespan": 35,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005238,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005976,
+          "reassign": 16
+        }
+      ],
+      "makespan_median": 35.0,
+      "makespan_min": 33.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 31.0,
+      "latency_mean_median": 16.188,
+      "imbalance_median": 0.006,
+      "reassign_median": 16.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 37,
+          "imbalance": 0.006063,
+          "reassign": 15
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006115,
+          "reassign": 18
+        },
+        {
+          "seed": 20276958,
+          "makespan": 35,
+          "latency_p95": 31,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004625,
+          "reassign": 17
+        },
+        {
+          "seed": 20284877,
+          "makespan": 39,
+          "latency_p95": 35,
+          "hi_qos_p95": 36,
+          "imbalance": 0.00673,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006074,
+          "reassign": 14
+        },
+        {
+          "seed": 20300715,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005249,
+          "reassign": 16
+        },
+        {
+          "seed": 20308634,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005818,
+          "reassign": 13
+        }
+      ],
+      "makespan_median": 37.0,
+      "makespan_min": 32.0,
+      "makespan_max": 39.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 29.0,
+      "latency_mean_median": 16.438,
+      "imbalance_median": 0.006,
+      "reassign_median": 16.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005995,
+          "reassign": 14
+        },
+        {
+          "seed": 20269039,
+          "makespan": 35,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005705,
+          "reassign": 12
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005826,
+          "reassign": 11
+        },
+        {
+          "seed": 20284877,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006246,
+          "reassign": 12
+        },
+        {
+          "seed": 20292796,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00591,
+          "reassign": 12
+        },
+        {
+          "seed": 20300715,
+          "makespan": 34,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006566,
+          "reassign": 12
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006363,
+          "reassign": 14
+        }
+      ],
+      "makespan_median": 34.0,
+      "makespan_min": 33.0,
+      "makespan_max": 36.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 31.0,
+      "latency_mean_median": 14.833,
+      "imbalance_median": 0.006,
+      "reassign_median": 12.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  },
+  "ablationRouterOnly": {
+    "nixos-baseline": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006003,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00629,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006,
+          "reassign": 13
+        },
+        {
+          "seed": 20284877,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006695,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006448,
+          "reassign": 15
+        },
+        {
+          "seed": 20300715,
+          "makespan": 35,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005238,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005976,
+          "reassign": 16
+        }
+      ],
+      "makespan_median": 35.0,
+      "makespan_min": 33.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 31.0,
+      "latency_mean_median": 16.188,
+      "imbalance_median": 0.006,
+      "reassign_median": 16.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 36,
+          "latency_p95": 34,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006213,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006289,
+          "reassign": 17
+        },
+        {
+          "seed": 20276958,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 26,
+          "imbalance": 0.004758,
+          "reassign": 11
+        },
+        {
+          "seed": 20284877,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006638,
+          "reassign": 15
+        },
+        {
+          "seed": 20292796,
+          "makespan": 34,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006244,
+          "reassign": 13
+        },
+        {
+          "seed": 20300715,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005093,
+          "reassign": 13
+        },
+        {
+          "seed": 20308634,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005779,
+          "reassign": 16
+        }
+      ],
+      "makespan_median": 34.0,
+      "makespan_min": 31.0,
+      "makespan_max": 36.0,
+      "latency_p95_median": 30.0,
+      "hi_qos_p95_median": 32.0,
+      "latency_mean_median": 16.167,
+      "imbalance_median": 0.006,
+      "reassign_median": 15.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00602,
+          "reassign": 11
+        },
+        {
+          "seed": 20269039,
+          "makespan": 35,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006349,
+          "reassign": 13
+        },
+        {
+          "seed": 20276958,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005404,
+          "reassign": 10
+        },
+        {
+          "seed": 20284877,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006186,
+          "reassign": 12
+        },
+        {
+          "seed": 20292796,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.00616,
+          "reassign": 12
+        },
+        {
+          "seed": 20300715,
+          "makespan": 31,
+          "latency_p95": 27,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006541,
+          "reassign": 8
+        },
+        {
+          "seed": 20308634,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005919,
+          "reassign": 12
+        }
+      ],
+      "makespan_median": 33.0,
+      "makespan_min": 30.0,
+      "makespan_max": 36.0,
+      "latency_p95_median": 30.0,
+      "hi_qos_p95_median": 29.0,
+      "latency_mean_median": 14.188,
+      "imbalance_median": 0.006,
+      "reassign_median": 12.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  },
+  "ablationSystemOnly": {
+    "nixos-baseline": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006003,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00629,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006,
+          "reassign": 13
+        },
+        {
+          "seed": 20284877,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006695,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006448,
+          "reassign": 15
+        },
+        {
+          "seed": 20300715,
+          "makespan": 35,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005238,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005976,
+          "reassign": 16
+        }
+      ],
+      "makespan_median": 35.0,
+      "makespan_min": 33.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 31.0,
+      "latency_mean_median": 16.188,
+      "imbalance_median": 0.006,
+      "reassign_median": 16.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 37,
+          "latency_p95": 35,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006086,
+          "reassign": 18
+        },
+        {
+          "seed": 20269039,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006243,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 39,
+          "latency_p95": 35,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006395,
+          "reassign": 16
+        },
+        {
+          "seed": 20284877,
+          "makespan": 34,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006002,
+          "reassign": 17
+        },
+        {
+          "seed": 20292796,
+          "makespan": 36,
+          "latency_p95": 34,
+          "hi_qos_p95": 34,
+          "imbalance": 0.006426,
+          "reassign": 14
+        },
+        {
+          "seed": 20300715,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005099,
+          "reassign": 11
+        },
+        {
+          "seed": 20308634,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005909,
+          "reassign": 14
+        }
+      ],
+      "makespan_median": 34.0,
+      "makespan_min": 31.0,
+      "makespan_max": 39.0,
+      "latency_p95_median": 33.0,
+      "hi_qos_p95_median": 32.0,
+      "latency_mean_median": 16.042,
+      "imbalance_median": 0.006,
+      "reassign_median": 16.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 7,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 36,
+          "imbalance": 0.006317,
+          "reassign": 16
+        },
+        {
+          "seed": 20269039,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005482,
+          "reassign": 18
+        },
+        {
+          "seed": 20276958,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005945,
+          "reassign": 18
+        },
+        {
+          "seed": 20284877,
+          "makespan": 39,
+          "latency_p95": 35,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006817,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 35,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006238,
+          "reassign": 14
+        },
+        {
+          "seed": 20300715,
+          "makespan": 39,
+          "latency_p95": 37,
+          "hi_qos_p95": 38,
+          "imbalance": 0.006002,
+          "reassign": 15
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005865,
+          "reassign": 18
+        }
+      ],
+      "makespan_median": 36.0,
+      "makespan_min": 35.0,
+      "makespan_max": 39.0,
+      "latency_p95_median": 33.0,
+      "hi_qos_p95_median": 33.0,
+      "latency_mean_median": 16.396,
+      "imbalance_median": 0.006,
+      "reassign_median": 18.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  }
+}

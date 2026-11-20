@@ -1,0 +1,1259 @@
+{
+  "config": {
+    "shards": 48,
+    "trials": 15,
+    "seed": 20261120
+  },
+  "mixes": {
+    "全交互": {
+      "tiersMix": {
+        "interactive": 1.0,
+        "default": 0.0,
+        "utility": 0.0,
+        "background": 0.0
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 127,
+          "raw": [
+            {
+              "makespan": 135,
+              "p95": 131,
+              "hi_qos_p95": 131
+            },
+            {
+              "makespan": 127,
+              "p95": 119,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 116,
+              "p95": 112,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 137,
+              "p95": 135,
+              "hi_qos_p95": 135
+            },
+            {
+              "makespan": 129,
+              "p95": 119,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 133,
+              "p95": 123,
+              "hi_qos_p95": 123
+            },
+            {
+              "makespan": 134,
+              "p95": 127,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 115,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 120,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 123,
+              "p95": 117,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 112,
+              "p95": 110,
+              "hi_qos_p95": 110
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 128,
+              "p95": 123,
+              "hi_qos_p95": 123
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 112,
+          "raw": [
+            {
+              "makespan": 123,
+              "p95": 118,
+              "hi_qos_p95": 118
+            },
+            {
+              "makespan": 112,
+              "p95": 106,
+              "hi_qos_p95": 106
+            },
+            {
+              "makespan": 115,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 119,
+              "p95": 116,
+              "hi_qos_p95": 116
+            },
+            {
+              "makespan": 106,
+              "p95": 100,
+              "hi_qos_p95": 100
+            },
+            {
+              "makespan": 108,
+              "p95": 99,
+              "hi_qos_p95": 99
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 112,
+              "p95": 107,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 99,
+              "p95": 95,
+              "hi_qos_p95": 95
+            },
+            {
+              "makespan": 109,
+              "p95": 107,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 112,
+              "p95": 108,
+              "hi_qos_p95": 108
+            },
+            {
+              "makespan": 115,
+              "p95": 110,
+              "hi_qos_p95": 110
+            },
+            {
+              "makespan": 101,
+              "p95": 97,
+              "hi_qos_p95": 97
+            },
+            {
+              "makespan": 103,
+              "p95": 100,
+              "hi_qos_p95": 100
+            },
+            {
+              "makespan": 119,
+              "p95": 111,
+              "hi_qos_p95": 111
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 119,
+          "raw": [
+            {
+              "makespan": 137,
+              "p95": 133,
+              "hi_qos_p95": 133
+            },
+            {
+              "makespan": 139,
+              "p95": 137,
+              "hi_qos_p95": 137
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 128,
+              "p95": 121,
+              "hi_qos_p95": 121
+            },
+            {
+              "makespan": 120,
+              "p95": 115,
+              "hi_qos_p95": 115
+            },
+            {
+              "makespan": 113,
+              "p95": 107,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 132,
+              "p95": 129,
+              "hi_qos_p95": 129
+            },
+            {
+              "makespan": 129,
+              "p95": 121,
+              "hi_qos_p95": 121
+            },
+            {
+              "makespan": 113,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 114,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 135,
+              "p95": 129,
+              "hi_qos_p95": 129
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 117,
+              "p95": 107,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 119,
+              "p95": 113,
+              "hi_qos_p95": 113
+            }
+          ]
+        }
+      }
+    },
+    "重交互": {
+      "tiersMix": {
+        "interactive": 0.6,
+        "default": 0.3,
+        "utility": 0.1,
+        "background": 0.0
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 127,
+          "raw": [
+            {
+              "makespan": 135,
+              "p95": 131,
+              "hi_qos_p95": 131
+            },
+            {
+              "makespan": 127,
+              "p95": 119,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 116,
+              "p95": 112,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 137,
+              "p95": 135,
+              "hi_qos_p95": 135
+            },
+            {
+              "makespan": 129,
+              "p95": 119,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 103
+            },
+            {
+              "makespan": 133,
+              "p95": 123,
+              "hi_qos_p95": 123
+            },
+            {
+              "makespan": 134,
+              "p95": 127,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 115,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 120,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 123,
+              "p95": 117,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 112,
+              "p95": 110,
+              "hi_qos_p95": 110
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 128,
+              "p95": 123,
+              "hi_qos_p95": 123
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 118,
+          "raw": [
+            {
+              "makespan": 129,
+              "p95": 120,
+              "hi_qos_p95": 123
+            },
+            {
+              "makespan": 119,
+              "p95": 111,
+              "hi_qos_p95": 111
+            },
+            {
+              "makespan": 116,
+              "p95": 113,
+              "hi_qos_p95": 113
+            },
+            {
+              "makespan": 131,
+              "p95": 128,
+              "hi_qos_p95": 128
+            },
+            {
+              "makespan": 116,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 110,
+              "p95": 108,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 121,
+              "p95": 117,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 119,
+              "p95": 112,
+              "hi_qos_p95": 111
+            },
+            {
+              "makespan": 103,
+              "p95": 101,
+              "hi_qos_p95": 101
+            },
+            {
+              "makespan": 108,
+              "p95": 99,
+              "hi_qos_p95": 96
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 110
+            },
+            {
+              "makespan": 118,
+              "p95": 112,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 103,
+              "p95": 97,
+              "hi_qos_p95": 97
+            },
+            {
+              "makespan": 112,
+              "p95": 103,
+              "hi_qos_p95": 98
+            },
+            {
+              "makespan": 129,
+              "p95": 122,
+              "hi_qos_p95": 122
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 119,
+          "raw": [
+            {
+              "makespan": 137,
+              "p95": 133,
+              "hi_qos_p95": 133
+            },
+            {
+              "makespan": 139,
+              "p95": 137,
+              "hi_qos_p95": 137
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 128,
+              "p95": 121,
+              "hi_qos_p95": 121
+            },
+            {
+              "makespan": 120,
+              "p95": 115,
+              "hi_qos_p95": 115
+            },
+            {
+              "makespan": 113,
+              "p95": 107,
+              "hi_qos_p95": 108
+            },
+            {
+              "makespan": 132,
+              "p95": 129,
+              "hi_qos_p95": 129
+            },
+            {
+              "makespan": 129,
+              "p95": 121,
+              "hi_qos_p95": 118
+            },
+            {
+              "makespan": 113,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 113
+            },
+            {
+              "makespan": 114,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 135,
+              "p95": 129,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 117,
+              "p95": 107,
+              "hi_qos_p95": 103
+            },
+            {
+              "makespan": 119,
+              "p95": 113,
+              "hi_qos_p95": 113
+            }
+          ]
+        }
+      }
+    },
+    "均衡": {
+      "tiersMix": {
+        "interactive": 0.25,
+        "default": 0.25,
+        "utility": 0.25,
+        "background": 0.25
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 127,
+          "raw": [
+            {
+              "makespan": 135,
+              "p95": 131,
+              "hi_qos_p95": 131
+            },
+            {
+              "makespan": 127,
+              "p95": 119,
+              "hi_qos_p95": 108
+            },
+            {
+              "makespan": 116,
+              "p95": 112,
+              "hi_qos_p95": 97
+            },
+            {
+              "makespan": 137,
+              "p95": 135,
+              "hi_qos_p95": 135
+            },
+            {
+              "makespan": 129,
+              "p95": 119,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 103
+            },
+            {
+              "makespan": 133,
+              "p95": 123,
+              "hi_qos_p95": 120
+            },
+            {
+              "makespan": 134,
+              "p95": 127,
+              "hi_qos_p95": 124
+            },
+            {
+              "makespan": 115,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 120,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 123,
+              "p95": 117,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 130
+            },
+            {
+              "makespan": 112,
+              "p95": 110,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 128,
+              "p95": 123,
+              "hi_qos_p95": 111
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 121,
+          "raw": [
+            {
+              "makespan": 129,
+              "p95": 123,
+              "hi_qos_p95": 120
+            },
+            {
+              "makespan": 124,
+              "p95": 118,
+              "hi_qos_p95": 122
+            },
+            {
+              "makespan": 120,
+              "p95": 118,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 133,
+              "p95": 129,
+              "hi_qos_p95": 129
+            },
+            {
+              "makespan": 121,
+              "p95": 118,
+              "hi_qos_p95": 110
+            },
+            {
+              "makespan": 114,
+              "p95": 111,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 124,
+              "p95": 119,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 121,
+              "p95": 117,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 108,
+              "p95": 100,
+              "hi_qos_p95": 100
+            },
+            {
+              "makespan": 116,
+              "p95": 111,
+              "hi_qos_p95": 113
+            },
+            {
+              "makespan": 117,
+              "p95": 111,
+              "hi_qos_p95": 108
+            },
+            {
+              "makespan": 130,
+              "p95": 122,
+              "hi_qos_p95": 115
+            },
+            {
+              "makespan": 117,
+              "p95": 115,
+              "hi_qos_p95": 116
+            },
+            {
+              "makespan": 110,
+              "p95": 102,
+              "hi_qos_p95": 99
+            },
+            {
+              "makespan": 131,
+              "p95": 122,
+              "hi_qos_p95": 124
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 119,
+          "raw": [
+            {
+              "makespan": 137,
+              "p95": 133,
+              "hi_qos_p95": 133
+            },
+            {
+              "makespan": 139,
+              "p95": 137,
+              "hi_qos_p95": 137
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 110
+            },
+            {
+              "makespan": 128,
+              "p95": 121,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 120,
+              "p95": 115,
+              "hi_qos_p95": 113
+            },
+            {
+              "makespan": 113,
+              "p95": 107,
+              "hi_qos_p95": 113
+            },
+            {
+              "makespan": 132,
+              "p95": 129,
+              "hi_qos_p95": 124
+            },
+            {
+              "makespan": 129,
+              "p95": 121,
+              "hi_qos_p95": 113
+            },
+            {
+              "makespan": 113,
+              "p95": 109,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 114,
+              "p95": 109,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 135,
+              "p95": 129,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 117,
+              "p95": 107,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 119,
+              "p95": 113,
+              "hi_qos_p95": 107
+            }
+          ]
+        }
+      }
+    },
+    "重后台": {
+      "tiersMix": {
+        "interactive": 0.05,
+        "default": 0.15,
+        "utility": 0.3,
+        "background": 0.5
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 127,
+          "raw": [
+            {
+              "makespan": 135,
+              "p95": 131,
+              "hi_qos_p95": 135
+            },
+            {
+              "makespan": 127,
+              "p95": 119,
+              "hi_qos_p95": 108
+            },
+            {
+              "makespan": 116,
+              "p95": 112,
+              "hi_qos_p95": 97
+            },
+            {
+              "makespan": 137,
+              "p95": 135,
+              "hi_qos_p95": 116
+            },
+            {
+              "makespan": 129,
+              "p95": 119,
+              "hi_qos_p95": 123
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 95
+            },
+            {
+              "makespan": 133,
+              "p95": 123,
+              "hi_qos_p95": 120
+            },
+            {
+              "makespan": 134,
+              "p95": 127,
+              "hi_qos_p95": 127
+            },
+            {
+              "makespan": 115,
+              "p95": 109,
+              "hi_qos_p95": 115
+            },
+            {
+              "makespan": 120,
+              "p95": 114,
+              "hi_qos_p95": 101
+            },
+            {
+              "makespan": 123,
+              "p95": 117,
+              "hi_qos_p95": 109
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 130
+            },
+            {
+              "makespan": 112,
+              "p95": 110,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 96
+            },
+            {
+              "makespan": 128,
+              "p95": 123,
+              "hi_qos_p95": 111
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 129,
+          "raw": [
+            {
+              "makespan": 130,
+              "p95": 124,
+              "hi_qos_p95": 124
+            },
+            {
+              "makespan": 130,
+              "p95": 121,
+              "hi_qos_p95": 130
+            },
+            {
+              "makespan": 121,
+              "p95": 116,
+              "hi_qos_p95": 94
+            },
+            {
+              "makespan": 131,
+              "p95": 129,
+              "hi_qos_p95": 131
+            },
+            {
+              "makespan": 122,
+              "p95": 114,
+              "hi_qos_p95": 118
+            },
+            {
+              "makespan": 114,
+              "p95": 110,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 134,
+              "p95": 128,
+              "hi_qos_p95": 128
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 112,
+              "p95": 103,
+              "hi_qos_p95": 100
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 116
+            },
+            {
+              "makespan": 129,
+              "p95": 122,
+              "hi_qos_p95": 129
+            },
+            {
+              "makespan": 131,
+              "p95": 120,
+              "hi_qos_p95": 103
+            },
+            {
+              "makespan": 118,
+              "p95": 115,
+              "hi_qos_p95": 118
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 100
+            },
+            {
+              "makespan": 132,
+              "p95": 123,
+              "hi_qos_p95": 132
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 119,
+          "raw": [
+            {
+              "makespan": 137,
+              "p95": 133,
+              "hi_qos_p95": 137
+            },
+            {
+              "makespan": 139,
+              "p95": 137,
+              "hi_qos_p95": 137
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 115
+            },
+            {
+              "makespan": 128,
+              "p95": 121,
+              "hi_qos_p95": 128
+            },
+            {
+              "makespan": 120,
+              "p95": 115,
+              "hi_qos_p95": 119
+            },
+            {
+              "makespan": 113,
+              "p95": 107,
+              "hi_qos_p95": 91
+            },
+            {
+              "makespan": 132,
+              "p95": 129,
+              "hi_qos_p95": 132
+            },
+            {
+              "makespan": 129,
+              "p95": 121,
+              "hi_qos_p95": 118
+            },
+            {
+              "makespan": 113,
+              "p95": 109,
+              "hi_qos_p95": 112
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 117
+            },
+            {
+              "makespan": 114,
+              "p95": 109,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 135,
+              "p95": 129,
+              "hi_qos_p95": 135
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 114
+            },
+            {
+              "makespan": 117,
+              "p95": 107,
+              "hi_qos_p95": 107
+            },
+            {
+              "makespan": 119,
+              "p95": 113,
+              "hi_qos_p95": 107
+            }
+          ]
+        }
+      }
+    },
+    "全后台": {
+      "tiersMix": {
+        "interactive": 0.0,
+        "default": 0.0,
+        "utility": 0.2,
+        "background": 0.8
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 127,
+          "raw": [
+            {
+              "makespan": 135,
+              "p95": 131,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 127,
+              "p95": 119,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 116,
+              "p95": 112,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 137,
+              "p95": 135,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 129,
+              "p95": 119,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 133,
+              "p95": 123,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 134,
+              "p95": 127,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 115,
+              "p95": 109,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 120,
+              "p95": 114,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 123,
+              "p95": 117,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 112,
+              "p95": 110,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 128,
+              "p95": 123,
+              "hi_qos_p95": 0
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 130,
+          "raw": [
+            {
+              "makespan": 133,
+              "p95": 124,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 132,
+              "p95": 123,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 121,
+              "p95": 116,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 131,
+              "p95": 129,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 124,
+              "p95": 116,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 114,
+              "p95": 110,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 136,
+              "p95": 130,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 131,
+              "p95": 127,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 113,
+              "p95": 110,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 130,
+              "p95": 123,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 131,
+              "p95": 120,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 119,
+              "p95": 115,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 132,
+              "p95": 123,
+              "hi_qos_p95": 0
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 119,
+          "raw": [
+            {
+              "makespan": 137,
+              "p95": 133,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 139,
+              "p95": 137,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 117,
+              "p95": 112,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 128,
+              "p95": 121,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 120,
+              "p95": 115,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 113,
+              "p95": 107,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 132,
+              "p95": 129,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 129,
+              "p95": 121,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 113,
+              "p95": 109,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 118,
+              "p95": 114,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 114,
+              "p95": 109,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 135,
+              "p95": 129,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 119,
+              "p95": 114,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 117,
+              "p95": 107,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 119,
+              "p95": 113,
+              "hi_qos_p95": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

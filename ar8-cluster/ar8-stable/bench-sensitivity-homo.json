@@ -1,0 +1,1260 @@
+{
+  "config": {
+    "shards": 48,
+    "trials": 15,
+    "seed": 20261120,
+    "homogeneous": true
+  },
+  "mixes": {
+    "全交互": {
+      "tiersMix": {
+        "interactive": 1.0,
+        "default": 0.0,
+        "utility": 0.0,
+        "background": 0.0
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 81,
+          "raw": [
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 87,
+              "p95": 80,
+              "hi_qos_p95": 80
+            },
+            {
+              "makespan": 86,
+              "p95": 82,
+              "hi_qos_p95": 82
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 89,
+              "p95": 82,
+              "hi_qos_p95": 82
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 77,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 73,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 89,
+              "p95": 86,
+              "hi_qos_p95": 86
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 71,
+          "raw": [
+            {
+              "makespan": 75,
+              "p95": 70,
+              "hi_qos_p95": 70
+            },
+            {
+              "makespan": 72,
+              "p95": 67,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 75,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 69,
+              "p95": 66,
+              "hi_qos_p95": 66
+            },
+            {
+              "makespan": 75,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 71,
+              "p95": 69,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 70,
+              "p95": 67,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 70,
+              "p95": 64,
+              "hi_qos_p95": 64
+            },
+            {
+              "makespan": 71,
+              "p95": 67,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 70,
+              "p95": 68,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 77,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 68,
+              "p95": 65,
+              "hi_qos_p95": 65
+            },
+            {
+              "makespan": 72,
+              "p95": 68,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 68,
+              "p95": 66,
+              "hi_qos_p95": 66
+            },
+            {
+              "makespan": 82,
+              "p95": 75,
+              "hi_qos_p95": 75
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 80,
+          "raw": [
+            {
+              "makespan": 80,
+              "p95": 79,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 86,
+              "p95": 78,
+              "hi_qos_p95": 78
+            },
+            {
+              "makespan": 75,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 90,
+              "p95": 85,
+              "hi_qos_p95": 85
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 80,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 85,
+              "p95": 79,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 81,
+              "p95": 79,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 79,
+              "p95": 77,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 90,
+              "p95": 86,
+              "hi_qos_p95": 86
+            }
+          ]
+        }
+      }
+    },
+    "重交互": {
+      "tiersMix": {
+        "interactive": 0.6,
+        "default": 0.3,
+        "utility": 0.1,
+        "background": 0.0
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 81,
+          "raw": [
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 87,
+              "p95": 80,
+              "hi_qos_p95": 80
+            },
+            {
+              "makespan": 86,
+              "p95": 82,
+              "hi_qos_p95": 82
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 72
+            },
+            {
+              "makespan": 89,
+              "p95": 82,
+              "hi_qos_p95": 81
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 80
+            },
+            {
+              "makespan": 77,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 72
+            },
+            {
+              "makespan": 73,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 89,
+              "p95": 86,
+              "hi_qos_p95": 86
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 74,
+          "raw": [
+            {
+              "makespan": 78,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 78,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 74,
+              "p95": 70,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 87,
+              "p95": 78,
+              "hi_qos_p95": 78
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 71,
+              "p95": 70,
+              "hi_qos_p95": 70
+            },
+            {
+              "makespan": 72,
+              "p95": 67,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 72,
+              "p95": 67,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 73,
+              "p95": 70,
+              "hi_qos_p95": 70
+            },
+            {
+              "makespan": 70,
+              "p95": 67,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 74,
+              "p95": 70,
+              "hi_qos_p95": 70
+            },
+            {
+              "makespan": 73,
+              "p95": 70,
+              "hi_qos_p95": 70
+            },
+            {
+              "makespan": 85,
+              "p95": 81,
+              "hi_qos_p95": 78
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 80,
+          "raw": [
+            {
+              "makespan": 80,
+              "p95": 79,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 86,
+              "p95": 78,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 75,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 90,
+              "p95": 88,
+              "hi_qos_p95": 88
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 80,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 81,
+              "p95": 77,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 75,
+              "p95": 70,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 81,
+              "p95": 79,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 79,
+              "p95": 77,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 90,
+              "p95": 86,
+              "hi_qos_p95": 81
+            }
+          ]
+        }
+      }
+    },
+    "均衡": {
+      "tiersMix": {
+        "interactive": 0.25,
+        "default": 0.25,
+        "utility": 0.25,
+        "background": 0.25
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 81,
+          "raw": [
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 87,
+              "p95": 80,
+              "hi_qos_p95": 80
+            },
+            {
+              "makespan": 86,
+              "p95": 82,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 89,
+              "p95": 82,
+              "hi_qos_p95": 82
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 72
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 78
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 80
+            },
+            {
+              "makespan": 77,
+              "p95": 73,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 73,
+              "p95": 71,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 89,
+              "p95": 86,
+              "hi_qos_p95": 81
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 77,
+          "raw": [
+            {
+              "makespan": 79,
+              "p95": 77,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 85,
+              "p95": 78,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 71,
+              "p95": 68,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 86,
+              "p95": 79,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 89,
+              "p95": 80,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 78
+            },
+            {
+              "makespan": 77,
+              "p95": 74,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 71,
+              "p95": 68,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 85,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 75,
+              "p95": 72,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 74,
+              "p95": 70,
+              "hi_qos_p95": 51
+            },
+            {
+              "makespan": 73,
+              "p95": 70,
+              "hi_qos_p95": 72
+            },
+            {
+              "makespan": 77,
+              "p95": 71,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 92,
+              "p95": 88,
+              "hi_qos_p95": 81
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 79,
+          "raw": [
+            {
+              "makespan": 80,
+              "p95": 79,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 86,
+              "p95": 78,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 90,
+              "p95": 88,
+              "hi_qos_p95": 89
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 78
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 86,
+              "p95": 79,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 81,
+              "p95": 77,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 74,
+              "p95": 71,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 75,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 76,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 90,
+              "p95": 86,
+              "hi_qos_p95": 81
+            }
+          ]
+        }
+      }
+    },
+    "重后台": {
+      "tiersMix": {
+        "interactive": 0.05,
+        "default": 0.15,
+        "utility": 0.3,
+        "background": 0.5
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 81,
+          "raw": [
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 81
+            },
+            {
+              "makespan": 87,
+              "p95": 80,
+              "hi_qos_p95": 80
+            },
+            {
+              "makespan": 86,
+              "p95": 82,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 81
+            },
+            {
+              "makespan": 89,
+              "p95": 82,
+              "hi_qos_p95": 82
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 78
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 81
+            },
+            {
+              "makespan": 77,
+              "p95": 73,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 66
+            },
+            {
+              "makespan": 73,
+              "p95": 71,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 64
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 76
+            },
+            {
+              "makespan": 89,
+              "p95": 86,
+              "hi_qos_p95": 81
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 78,
+          "raw": [
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 77,
+              "p95": 74,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 86,
+              "p95": 82,
+              "hi_qos_p95": 59
+            },
+            {
+              "makespan": 77,
+              "p95": 74,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 87,
+              "p95": 81,
+              "hi_qos_p95": 87
+            },
+            {
+              "makespan": 80,
+              "p95": 76,
+              "hi_qos_p95": 72
+            },
+            {
+              "makespan": 78,
+              "p95": 74,
+              "hi_qos_p95": 73
+            },
+            {
+              "makespan": 81,
+              "p95": 73,
+              "hi_qos_p95": 60
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 69
+            },
+            {
+              "makespan": 77,
+              "p95": 75,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 75,
+              "p95": 72,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 73,
+              "p95": 71,
+              "hi_qos_p95": 71
+            },
+            {
+              "makespan": 75,
+              "p95": 69,
+              "hi_qos_p95": 64
+            },
+            {
+              "makespan": 81,
+              "p95": 73,
+              "hi_qos_p95": 72
+            },
+            {
+              "makespan": 90,
+              "p95": 88,
+              "hi_qos_p95": 88
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 79,
+          "raw": [
+            {
+              "makespan": 80,
+              "p95": 79,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 86,
+              "p95": 78,
+              "hi_qos_p95": 68
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 89,
+              "p95": 85,
+              "hi_qos_p95": 85
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 86,
+              "p95": 79,
+              "hi_qos_p95": 79
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 75
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 81
+            },
+            {
+              "makespan": 74,
+              "p95": 71,
+              "hi_qos_p95": 67
+            },
+            {
+              "makespan": 75,
+              "p95": 74,
+              "hi_qos_p95": 74
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 77
+            },
+            {
+              "makespan": 90,
+              "p95": 86,
+              "hi_qos_p95": 88
+            }
+          ]
+        }
+      }
+    },
+    "全后台": {
+      "tiersMix": {
+        "interactive": 0.0,
+        "default": 0.0,
+        "utility": 0.2,
+        "background": 0.8
+      },
+      "profiles": {
+        "nixos-baseline": {
+          "makespan_median": 81,
+          "raw": [
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 87,
+              "p95": 80,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 86,
+              "p95": 82,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 89,
+              "p95": 82,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 77,
+              "p95": 73,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 73,
+              "p95": 71,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 72,
+              "p95": 69,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 89,
+              "p95": 86,
+              "hi_qos_p95": 0
+            }
+          ]
+        },
+        "xnu-qos": {
+          "makespan_median": 79,
+          "raw": [
+            {
+              "makespan": 82,
+              "p95": 78,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 79,
+              "p95": 78,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 87,
+              "p95": 77,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 75,
+              "p95": 74,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 87,
+              "p95": 80,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 77,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 76,
+              "p95": 71,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 79,
+              "p95": 73,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 79,
+              "p95": 75,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 75,
+              "p95": 72,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 74,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 75,
+              "p95": 72,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 80,
+              "p95": 75,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 92,
+              "p95": 86,
+              "hi_qos_p95": 0
+            }
+          ]
+        },
+        "oh-distributed": {
+          "makespan_median": 79,
+          "raw": [
+            {
+              "makespan": 80,
+              "p95": 79,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 86,
+              "p95": 78,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 76,
+              "p95": 73,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 89,
+              "p95": 85,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 79,
+              "p95": 74,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 86,
+              "p95": 79,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 71,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 75,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 81,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 74,
+              "p95": 71,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 75,
+              "p95": 74,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 78,
+              "p95": 76,
+              "hi_qos_p95": 0
+            },
+            {
+              "makespan": 89,
+              "p95": 87,
+              "hi_qos_p95": 0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

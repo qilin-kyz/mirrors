@@ -1,0 +1,2396 @@
+{
+  "config": {
+    "shards": 48,
+    "trials": 31,
+    "seed": 20261120,
+    "nodes": 8,
+    "tiersMix": {
+      "interactive": 0.2,
+      "default": 0.3,
+      "utility": 0.3,
+      "background": 0.2
+    },
+    "failureInjection": false
+  },
+  "workload": {
+    "tierCounts": {
+      "background": 13,
+      "utility": 10,
+      "default": 16,
+      "interactive": 9
+    }
+  },
+  "main": {
+    "nixos-baseline": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006003,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00629,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006,
+          "reassign": 13
+        },
+        {
+          "seed": 20284877,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006695,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006448,
+          "reassign": 15
+        },
+        {
+          "seed": 20300715,
+          "makespan": 35,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005238,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005976,
+          "reassign": 16
+        },
+        {
+          "seed": 20316553,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005577,
+          "reassign": 15
+        },
+        {
+          "seed": 20324472,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006375,
+          "reassign": 14
+        },
+        {
+          "seed": 20332391,
+          "makespan": 30,
+          "latency_p95": 27,
+          "hi_qos_p95": 30,
+          "imbalance": 0.004858,
+          "reassign": 11
+        },
+        {
+          "seed": 20340310,
+          "makespan": 33,
+          "latency_p95": 28,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005574,
+          "reassign": 11
+        },
+        {
+          "seed": 20348229,
+          "makespan": 37,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006256,
+          "reassign": 16
+        },
+        {
+          "seed": 20356148,
+          "makespan": 30,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005102,
+          "reassign": 11
+        },
+        {
+          "seed": 20364067,
+          "makespan": 32,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005573,
+          "reassign": 12
+        },
+        {
+          "seed": 20371986,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.00674,
+          "reassign": 14
+        },
+        {
+          "seed": 20379905,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 25,
+          "imbalance": 0.004842,
+          "reassign": 11
+        },
+        {
+          "seed": 20387824,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.008132,
+          "reassign": 16
+        },
+        {
+          "seed": 20395743,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006785,
+          "reassign": 14
+        },
+        {
+          "seed": 20403662,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006718,
+          "reassign": 19
+        },
+        {
+          "seed": 20411581,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 36,
+          "imbalance": 0.006564,
+          "reassign": 16
+        },
+        {
+          "seed": 20419500,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005594,
+          "reassign": 17
+        },
+        {
+          "seed": 20427419,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 35,
+          "imbalance": 0.007254,
+          "reassign": 17
+        },
+        {
+          "seed": 20435338,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005119,
+          "reassign": 12
+        },
+        {
+          "seed": 20443257,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006641,
+          "reassign": 15
+        },
+        {
+          "seed": 20451176,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004224,
+          "reassign": 13
+        },
+        {
+          "seed": 20459095,
+          "makespan": 28,
+          "latency_p95": 26,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006192,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005553,
+          "reassign": 17
+        },
+        {
+          "seed": 20474933,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006046,
+          "reassign": 10
+        },
+        {
+          "seed": 20482852,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00592,
+          "reassign": 15
+        },
+        {
+          "seed": 20490771,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006399,
+          "reassign": 13
+        },
+        {
+          "seed": 20498690,
+          "makespan": 38,
+          "latency_p95": 33,
+          "hi_qos_p95": 31,
+          "imbalance": 0.007137,
+          "reassign": 15
+        }
+      ],
+      "makespan_median": 33.0,
+      "makespan_min": 28.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 30.0,
+      "hi_qos_p95_median": 30.0,
+      "latency_mean_median": 15.604,
+      "imbalance_median": 0.006,
+      "reassign_median": 15.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006074,
+          "reassign": 13
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006204,
+          "reassign": 17
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005996,
+          "reassign": 14
+        },
+        {
+          "seed": 20284877,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006622,
+          "reassign": 14
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006183,
+          "reassign": 13
+        },
+        {
+          "seed": 20300715,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.00523,
+          "reassign": 14
+        },
+        {
+          "seed": 20308634,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005831,
+          "reassign": 12
+        },
+        {
+          "seed": 20316553,
+          "makespan": 35,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005759,
+          "reassign": 15
+        },
+        {
+          "seed": 20324472,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 25,
+          "imbalance": 0.006558,
+          "reassign": 16
+        },
+        {
+          "seed": 20332391,
+          "makespan": 30,
+          "latency_p95": 26,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004654,
+          "reassign": 11
+        },
+        {
+          "seed": 20340310,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005315,
+          "reassign": 11
+        },
+        {
+          "seed": 20348229,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.00514,
+          "reassign": 15
+        },
+        {
+          "seed": 20356148,
+          "makespan": 29,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.004828,
+          "reassign": 12
+        },
+        {
+          "seed": 20364067,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005591,
+          "reassign": 9
+        },
+        {
+          "seed": 20371986,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006911,
+          "reassign": 11
+        },
+        {
+          "seed": 20379905,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 27,
+          "imbalance": 0.004782,
+          "reassign": 10
+        },
+        {
+          "seed": 20387824,
+          "makespan": 38,
+          "latency_p95": 35,
+          "hi_qos_p95": 37,
+          "imbalance": 0.008202,
+          "reassign": 17
+        },
+        {
+          "seed": 20395743,
+          "makespan": 34,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.00631,
+          "reassign": 15
+        },
+        {
+          "seed": 20403662,
+          "makespan": 38,
+          "latency_p95": 31,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006928,
+          "reassign": 15
+        },
+        {
+          "seed": 20411581,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 26,
+          "imbalance": 0.006771,
+          "reassign": 14
+        },
+        {
+          "seed": 20419500,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005627,
+          "reassign": 17
+        },
+        {
+          "seed": 20427419,
+          "makespan": 37,
+          "latency_p95": 33,
+          "hi_qos_p95": 27,
+          "imbalance": 0.007459,
+          "reassign": 15
+        },
+        {
+          "seed": 20435338,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005109,
+          "reassign": 10
+        },
+        {
+          "seed": 20443257,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006693,
+          "reassign": 17
+        },
+        {
+          "seed": 20451176,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004265,
+          "reassign": 11
+        },
+        {
+          "seed": 20459095,
+          "makespan": 27,
+          "latency_p95": 25,
+          "hi_qos_p95": 24,
+          "imbalance": 0.006091,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005551,
+          "reassign": 12
+        },
+        {
+          "seed": 20474933,
+          "makespan": 27,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005089,
+          "reassign": 12
+        },
+        {
+          "seed": 20482852,
+          "makespan": 34,
+          "latency_p95": 33,
+          "hi_qos_p95": 28,
+          "imbalance": 0.00597,
+          "reassign": 14
+        },
+        {
+          "seed": 20490771,
+          "makespan": 30,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006545,
+          "reassign": 13
+        },
+        {
+          "seed": 20498690,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006901,
+          "reassign": 16
+        }
+      ],
+      "makespan_median": 33.0,
+      "makespan_min": 27.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 30.0,
+      "hi_qos_p95_median": 29.0,
+      "latency_mean_median": 15.021,
+      "imbalance_median": 0.006,
+      "reassign_median": 14.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006096,
+          "reassign": 11
+        },
+        {
+          "seed": 20269039,
+          "makespan": 34,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005767,
+          "reassign": 12
+        },
+        {
+          "seed": 20276958,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005807,
+          "reassign": 10
+        },
+        {
+          "seed": 20284877,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006235,
+          "reassign": 12
+        },
+        {
+          "seed": 20292796,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005911,
+          "reassign": 10
+        },
+        {
+          "seed": 20300715,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006701,
+          "reassign": 11
+        },
+        {
+          "seed": 20308634,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006249,
+          "reassign": 11
+        },
+        {
+          "seed": 20316553,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006412,
+          "reassign": 11
+        },
+        {
+          "seed": 20324472,
+          "makespan": 29,
+          "latency_p95": 27,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006503,
+          "reassign": 8
+        },
+        {
+          "seed": 20332391,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 25,
+          "imbalance": 0.006714,
+          "reassign": 9
+        },
+        {
+          "seed": 20340310,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006718,
+          "reassign": 11
+        },
+        {
+          "seed": 20348229,
+          "makespan": 40,
+          "latency_p95": 34,
+          "hi_qos_p95": 34,
+          "imbalance": 0.006031,
+          "reassign": 16
+        },
+        {
+          "seed": 20356148,
+          "makespan": 28,
+          "latency_p95": 26,
+          "hi_qos_p95": 25,
+          "imbalance": 0.005888,
+          "reassign": 10
+        },
+        {
+          "seed": 20364067,
+          "makespan": 34,
+          "latency_p95": 27,
+          "hi_qos_p95": 22,
+          "imbalance": 0.005646,
+          "reassign": 8
+        },
+        {
+          "seed": 20371986,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006544,
+          "reassign": 12
+        },
+        {
+          "seed": 20379905,
+          "makespan": 34,
+          "latency_p95": 27,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005564,
+          "reassign": 11
+        },
+        {
+          "seed": 20387824,
+          "makespan": 35,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006397,
+          "reassign": 14
+        },
+        {
+          "seed": 20395743,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005017,
+          "reassign": 12
+        },
+        {
+          "seed": 20403662,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 25,
+          "imbalance": 0.006269,
+          "reassign": 9
+        },
+        {
+          "seed": 20411581,
+          "makespan": 35,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.007166,
+          "reassign": 12
+        },
+        {
+          "seed": 20419500,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005866,
+          "reassign": 10
+        },
+        {
+          "seed": 20427419,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.00563,
+          "reassign": 12
+        },
+        {
+          "seed": 20435338,
+          "makespan": 29,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006754,
+          "reassign": 10
+        },
+        {
+          "seed": 20443257,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006648,
+          "reassign": 11
+        },
+        {
+          "seed": 20451176,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005807,
+          "reassign": 9
+        },
+        {
+          "seed": 20459095,
+          "makespan": 29,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.00599,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006835,
+          "reassign": 11
+        },
+        {
+          "seed": 20474933,
+          "makespan": 31,
+          "latency_p95": 26,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006425,
+          "reassign": 7
+        },
+        {
+          "seed": 20482852,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006503,
+          "reassign": 13
+        },
+        {
+          "seed": 20490771,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006688,
+          "reassign": 10
+        },
+        {
+          "seed": 20498690,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006281,
+          "reassign": 12
+        }
+      ],
+      "makespan_median": 32.0,
+      "makespan_min": 28.0,
+      "makespan_max": 40.0,
+      "latency_p95_median": 29.0,
+      "hi_qos_p95_median": 29.0,
+      "latency_mean_median": 13.75,
+      "imbalance_median": 0.006,
+      "reassign_median": 11.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  },
+  "ablationRouterOnly": {
+    "nixos-baseline": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006003,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00629,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006,
+          "reassign": 13
+        },
+        {
+          "seed": 20284877,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006695,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006448,
+          "reassign": 15
+        },
+        {
+          "seed": 20300715,
+          "makespan": 35,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005238,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005976,
+          "reassign": 16
+        },
+        {
+          "seed": 20316553,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005577,
+          "reassign": 15
+        },
+        {
+          "seed": 20324472,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006375,
+          "reassign": 14
+        },
+        {
+          "seed": 20332391,
+          "makespan": 30,
+          "latency_p95": 27,
+          "hi_qos_p95": 30,
+          "imbalance": 0.004858,
+          "reassign": 11
+        },
+        {
+          "seed": 20340310,
+          "makespan": 33,
+          "latency_p95": 28,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005574,
+          "reassign": 11
+        },
+        {
+          "seed": 20348229,
+          "makespan": 37,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006256,
+          "reassign": 16
+        },
+        {
+          "seed": 20356148,
+          "makespan": 30,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005102,
+          "reassign": 11
+        },
+        {
+          "seed": 20364067,
+          "makespan": 32,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005573,
+          "reassign": 12
+        },
+        {
+          "seed": 20371986,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.00674,
+          "reassign": 14
+        },
+        {
+          "seed": 20379905,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 25,
+          "imbalance": 0.004842,
+          "reassign": 11
+        },
+        {
+          "seed": 20387824,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.008132,
+          "reassign": 16
+        },
+        {
+          "seed": 20395743,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006785,
+          "reassign": 14
+        },
+        {
+          "seed": 20403662,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006718,
+          "reassign": 19
+        },
+        {
+          "seed": 20411581,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 36,
+          "imbalance": 0.006564,
+          "reassign": 16
+        },
+        {
+          "seed": 20419500,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005594,
+          "reassign": 17
+        },
+        {
+          "seed": 20427419,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 35,
+          "imbalance": 0.007254,
+          "reassign": 17
+        },
+        {
+          "seed": 20435338,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005119,
+          "reassign": 12
+        },
+        {
+          "seed": 20443257,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006641,
+          "reassign": 15
+        },
+        {
+          "seed": 20451176,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004224,
+          "reassign": 13
+        },
+        {
+          "seed": 20459095,
+          "makespan": 28,
+          "latency_p95": 26,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006192,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005553,
+          "reassign": 17
+        },
+        {
+          "seed": 20474933,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006046,
+          "reassign": 10
+        },
+        {
+          "seed": 20482852,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00592,
+          "reassign": 15
+        },
+        {
+          "seed": 20490771,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006399,
+          "reassign": 13
+        },
+        {
+          "seed": 20498690,
+          "makespan": 38,
+          "latency_p95": 33,
+          "hi_qos_p95": 31,
+          "imbalance": 0.007137,
+          "reassign": 15
+        }
+      ],
+      "makespan_median": 33.0,
+      "makespan_min": 28.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 30.0,
+      "hi_qos_p95_median": 30.0,
+      "latency_mean_median": 15.604,
+      "imbalance_median": 0.006,
+      "reassign_median": 15.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 36,
+          "latency_p95": 34,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006213,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006289,
+          "reassign": 17
+        },
+        {
+          "seed": 20276958,
+          "makespan": 31,
+          "latency_p95": 28,
+          "hi_qos_p95": 26,
+          "imbalance": 0.004758,
+          "reassign": 11
+        },
+        {
+          "seed": 20284877,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006638,
+          "reassign": 15
+        },
+        {
+          "seed": 20292796,
+          "makespan": 34,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006244,
+          "reassign": 13
+        },
+        {
+          "seed": 20300715,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005093,
+          "reassign": 13
+        },
+        {
+          "seed": 20308634,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005779,
+          "reassign": 16
+        },
+        {
+          "seed": 20316553,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005548,
+          "reassign": 15
+        },
+        {
+          "seed": 20324472,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006545,
+          "reassign": 12
+        },
+        {
+          "seed": 20332391,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.003879,
+          "reassign": 13
+        },
+        {
+          "seed": 20340310,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005434,
+          "reassign": 14
+        },
+        {
+          "seed": 20348229,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.0061,
+          "reassign": 19
+        },
+        {
+          "seed": 20356148,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.00524,
+          "reassign": 13
+        },
+        {
+          "seed": 20364067,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.004844,
+          "reassign": 14
+        },
+        {
+          "seed": 20371986,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006559,
+          "reassign": 15
+        },
+        {
+          "seed": 20379905,
+          "makespan": 35,
+          "latency_p95": 34,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005436,
+          "reassign": 14
+        },
+        {
+          "seed": 20387824,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.008018,
+          "reassign": 18
+        },
+        {
+          "seed": 20395743,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006392,
+          "reassign": 16
+        },
+        {
+          "seed": 20403662,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006869,
+          "reassign": 17
+        },
+        {
+          "seed": 20411581,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006939,
+          "reassign": 17
+        },
+        {
+          "seed": 20419500,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005586,
+          "reassign": 15
+        },
+        {
+          "seed": 20427419,
+          "makespan": 36,
+          "latency_p95": 34,
+          "hi_qos_p95": 32,
+          "imbalance": 0.007657,
+          "reassign": 18
+        },
+        {
+          "seed": 20435338,
+          "makespan": 29,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.004658,
+          "reassign": 12
+        },
+        {
+          "seed": 20443257,
+          "makespan": 35,
+          "latency_p95": 31,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006871,
+          "reassign": 14
+        },
+        {
+          "seed": 20451176,
+          "makespan": 37,
+          "latency_p95": 34,
+          "hi_qos_p95": 36,
+          "imbalance": 0.004576,
+          "reassign": 15
+        },
+        {
+          "seed": 20459095,
+          "makespan": 28,
+          "latency_p95": 26,
+          "hi_qos_p95": 23,
+          "imbalance": 0.006077,
+          "reassign": 7
+        },
+        {
+          "seed": 20467014,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005744,
+          "reassign": 14
+        },
+        {
+          "seed": 20474933,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 26,
+          "imbalance": 0.006113,
+          "reassign": 10
+        },
+        {
+          "seed": 20482852,
+          "makespan": 38,
+          "latency_p95": 31,
+          "hi_qos_p95": 34,
+          "imbalance": 0.006052,
+          "reassign": 18
+        },
+        {
+          "seed": 20490771,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006647,
+          "reassign": 14
+        },
+        {
+          "seed": 20498690,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006684,
+          "reassign": 13
+        }
+      ],
+      "makespan_median": 34.0,
+      "makespan_min": 28.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 31.0,
+      "latency_mean_median": 15.583,
+      "imbalance_median": 0.006,
+      "reassign_median": 14.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00602,
+          "reassign": 11
+        },
+        {
+          "seed": 20269039,
+          "makespan": 35,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006349,
+          "reassign": 13
+        },
+        {
+          "seed": 20276958,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005404,
+          "reassign": 10
+        },
+        {
+          "seed": 20284877,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006186,
+          "reassign": 12
+        },
+        {
+          "seed": 20292796,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.00616,
+          "reassign": 12
+        },
+        {
+          "seed": 20300715,
+          "makespan": 31,
+          "latency_p95": 27,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006541,
+          "reassign": 8
+        },
+        {
+          "seed": 20308634,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005919,
+          "reassign": 12
+        },
+        {
+          "seed": 20316553,
+          "makespan": 34,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006016,
+          "reassign": 13
+        },
+        {
+          "seed": 20324472,
+          "makespan": 33,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006871,
+          "reassign": 10
+        },
+        {
+          "seed": 20332391,
+          "makespan": 30,
+          "latency_p95": 27,
+          "hi_qos_p95": 26,
+          "imbalance": 0.00662,
+          "reassign": 9
+        },
+        {
+          "seed": 20340310,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006714,
+          "reassign": 12
+        },
+        {
+          "seed": 20348229,
+          "makespan": 37,
+          "latency_p95": 31,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005926,
+          "reassign": 13
+        },
+        {
+          "seed": 20356148,
+          "makespan": 28,
+          "latency_p95": 26,
+          "hi_qos_p95": 25,
+          "imbalance": 0.005926,
+          "reassign": 8
+        },
+        {
+          "seed": 20364067,
+          "makespan": 32,
+          "latency_p95": 28,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005407,
+          "reassign": 10
+        },
+        {
+          "seed": 20371986,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006437,
+          "reassign": 11
+        },
+        {
+          "seed": 20379905,
+          "makespan": 34,
+          "latency_p95": 28,
+          "hi_qos_p95": 25,
+          "imbalance": 0.005591,
+          "reassign": 8
+        },
+        {
+          "seed": 20387824,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006257,
+          "reassign": 14
+        },
+        {
+          "seed": 20395743,
+          "makespan": 34,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005702,
+          "reassign": 11
+        },
+        {
+          "seed": 20403662,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 25,
+          "imbalance": 0.006,
+          "reassign": 10
+        },
+        {
+          "seed": 20411581,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 33,
+          "imbalance": 0.007486,
+          "reassign": 11
+        },
+        {
+          "seed": 20419500,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005738,
+          "reassign": 10
+        },
+        {
+          "seed": 20427419,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005666,
+          "reassign": 9
+        },
+        {
+          "seed": 20435338,
+          "makespan": 27,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.004897,
+          "reassign": 9
+        },
+        {
+          "seed": 20443257,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006232,
+          "reassign": 12
+        },
+        {
+          "seed": 20451176,
+          "makespan": 34,
+          "latency_p95": 30,
+          "hi_qos_p95": 26,
+          "imbalance": 0.006115,
+          "reassign": 9
+        },
+        {
+          "seed": 20459095,
+          "makespan": 27,
+          "latency_p95": 25,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005814,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005972,
+          "reassign": 13
+        },
+        {
+          "seed": 20474933,
+          "makespan": 32,
+          "latency_p95": 28,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006928,
+          "reassign": 8
+        },
+        {
+          "seed": 20482852,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00638,
+          "reassign": 13
+        },
+        {
+          "seed": 20490771,
+          "makespan": 30,
+          "latency_p95": 27,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006433,
+          "reassign": 10
+        },
+        {
+          "seed": 20498690,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006411,
+          "reassign": 10
+        }
+      ],
+      "makespan_median": 32.0,
+      "makespan_min": 27.0,
+      "makespan_max": 37.0,
+      "latency_p95_median": 29.0,
+      "hi_qos_p95_median": 29.0,
+      "latency_mean_median": 13.854,
+      "imbalance_median": 0.006,
+      "reassign_median": 10.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  },
+  "ablationSystemOnly": {
+    "nixos-baseline": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006003,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00629,
+          "reassign": 16
+        },
+        {
+          "seed": 20276958,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006,
+          "reassign": 13
+        },
+        {
+          "seed": 20284877,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006695,
+          "reassign": 18
+        },
+        {
+          "seed": 20292796,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006448,
+          "reassign": 15
+        },
+        {
+          "seed": 20300715,
+          "makespan": 35,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005238,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005976,
+          "reassign": 16
+        },
+        {
+          "seed": 20316553,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005577,
+          "reassign": 15
+        },
+        {
+          "seed": 20324472,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006375,
+          "reassign": 14
+        },
+        {
+          "seed": 20332391,
+          "makespan": 30,
+          "latency_p95": 27,
+          "hi_qos_p95": 30,
+          "imbalance": 0.004858,
+          "reassign": 11
+        },
+        {
+          "seed": 20340310,
+          "makespan": 33,
+          "latency_p95": 28,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005574,
+          "reassign": 11
+        },
+        {
+          "seed": 20348229,
+          "makespan": 37,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006256,
+          "reassign": 16
+        },
+        {
+          "seed": 20356148,
+          "makespan": 30,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005102,
+          "reassign": 11
+        },
+        {
+          "seed": 20364067,
+          "makespan": 32,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005573,
+          "reassign": 12
+        },
+        {
+          "seed": 20371986,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.00674,
+          "reassign": 14
+        },
+        {
+          "seed": 20379905,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 25,
+          "imbalance": 0.004842,
+          "reassign": 11
+        },
+        {
+          "seed": 20387824,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.008132,
+          "reassign": 16
+        },
+        {
+          "seed": 20395743,
+          "makespan": 37,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006785,
+          "reassign": 14
+        },
+        {
+          "seed": 20403662,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006718,
+          "reassign": 19
+        },
+        {
+          "seed": 20411581,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 36,
+          "imbalance": 0.006564,
+          "reassign": 16
+        },
+        {
+          "seed": 20419500,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005594,
+          "reassign": 17
+        },
+        {
+          "seed": 20427419,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 35,
+          "imbalance": 0.007254,
+          "reassign": 17
+        },
+        {
+          "seed": 20435338,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005119,
+          "reassign": 12
+        },
+        {
+          "seed": 20443257,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006641,
+          "reassign": 15
+        },
+        {
+          "seed": 20451176,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004224,
+          "reassign": 13
+        },
+        {
+          "seed": 20459095,
+          "makespan": 28,
+          "latency_p95": 26,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006192,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005553,
+          "reassign": 17
+        },
+        {
+          "seed": 20474933,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006046,
+          "reassign": 10
+        },
+        {
+          "seed": 20482852,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 31,
+          "imbalance": 0.00592,
+          "reassign": 15
+        },
+        {
+          "seed": 20490771,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006399,
+          "reassign": 13
+        },
+        {
+          "seed": 20498690,
+          "makespan": 38,
+          "latency_p95": 33,
+          "hi_qos_p95": 31,
+          "imbalance": 0.007137,
+          "reassign": 15
+        }
+      ],
+      "makespan_median": 33.0,
+      "makespan_min": 28.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 30.0,
+      "hi_qos_p95_median": 30.0,
+      "latency_mean_median": 15.604,
+      "imbalance_median": 0.006,
+      "reassign_median": 15.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 34,
+          "imbalance": 0.006095,
+          "reassign": 17
+        },
+        {
+          "seed": 20269039,
+          "makespan": 34,
+          "latency_p95": 30,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006277,
+          "reassign": 14
+        },
+        {
+          "seed": 20276958,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.006422,
+          "reassign": 14
+        },
+        {
+          "seed": 20284877,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 34,
+          "imbalance": 0.006624,
+          "reassign": 14
+        },
+        {
+          "seed": 20292796,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 26,
+          "imbalance": 0.006061,
+          "reassign": 12
+        },
+        {
+          "seed": 20300715,
+          "makespan": 34,
+          "latency_p95": 29,
+          "hi_qos_p95": 25,
+          "imbalance": 0.005259,
+          "reassign": 9
+        },
+        {
+          "seed": 20308634,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006041,
+          "reassign": 13
+        },
+        {
+          "seed": 20316553,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005643,
+          "reassign": 14
+        },
+        {
+          "seed": 20324472,
+          "makespan": 34,
+          "latency_p95": 33,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006998,
+          "reassign": 16
+        },
+        {
+          "seed": 20332391,
+          "makespan": 33,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.004915,
+          "reassign": 13
+        },
+        {
+          "seed": 20340310,
+          "makespan": 29,
+          "latency_p95": 28,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005149,
+          "reassign": 14
+        },
+        {
+          "seed": 20348229,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006131,
+          "reassign": 17
+        },
+        {
+          "seed": 20356148,
+          "makespan": 33,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.00503,
+          "reassign": 13
+        },
+        {
+          "seed": 20364067,
+          "makespan": 30,
+          "latency_p95": 30,
+          "hi_qos_p95": 30,
+          "imbalance": 0.005449,
+          "reassign": 16
+        },
+        {
+          "seed": 20371986,
+          "makespan": 34,
+          "latency_p95": 32,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006591,
+          "reassign": 15
+        },
+        {
+          "seed": 20379905,
+          "makespan": 31,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.004942,
+          "reassign": 11
+        },
+        {
+          "seed": 20387824,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 35,
+          "imbalance": 0.007961,
+          "reassign": 17
+        },
+        {
+          "seed": 20395743,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006307,
+          "reassign": 13
+        },
+        {
+          "seed": 20403662,
+          "makespan": 39,
+          "latency_p95": 33,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006997,
+          "reassign": 16
+        },
+        {
+          "seed": 20411581,
+          "makespan": 34,
+          "latency_p95": 30,
+          "hi_qos_p95": 34,
+          "imbalance": 0.006653,
+          "reassign": 16
+        },
+        {
+          "seed": 20419500,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005515,
+          "reassign": 14
+        },
+        {
+          "seed": 20427419,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 28,
+          "imbalance": 0.007204,
+          "reassign": 15
+        },
+        {
+          "seed": 20435338,
+          "makespan": 33,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005521,
+          "reassign": 10
+        },
+        {
+          "seed": 20443257,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006718,
+          "reassign": 17
+        },
+        {
+          "seed": 20451176,
+          "makespan": 29,
+          "latency_p95": 27,
+          "hi_qos_p95": 25,
+          "imbalance": 0.004167,
+          "reassign": 12
+        },
+        {
+          "seed": 20459095,
+          "makespan": 26,
+          "latency_p95": 25,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005992,
+          "reassign": 8
+        },
+        {
+          "seed": 20467014,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 27,
+          "imbalance": 0.005546,
+          "reassign": 13
+        },
+        {
+          "seed": 20474933,
+          "makespan": 31,
+          "latency_p95": 27,
+          "hi_qos_p95": 24,
+          "imbalance": 0.004475,
+          "reassign": 10
+        },
+        {
+          "seed": 20482852,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005787,
+          "reassign": 17
+        },
+        {
+          "seed": 20490771,
+          "makespan": 28,
+          "latency_p95": 27,
+          "hi_qos_p95": 27,
+          "imbalance": 0.006405,
+          "reassign": 11
+        },
+        {
+          "seed": 20498690,
+          "makespan": 33,
+          "latency_p95": 32,
+          "hi_qos_p95": 32,
+          "imbalance": 0.006805,
+          "reassign": 15
+        }
+      ],
+      "makespan_median": 33.0,
+      "makespan_min": 26.0,
+      "makespan_max": 39.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 29.0,
+      "latency_mean_median": 15.083,
+      "imbalance_median": 0.006,
+      "reassign_median": 14.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 31,
+      "raw": [
+        {
+          "seed": 20261120,
+          "makespan": 35,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006076,
+          "reassign": 14
+        },
+        {
+          "seed": 20269039,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.00636,
+          "reassign": 17
+        },
+        {
+          "seed": 20276958,
+          "makespan": 32,
+          "latency_p95": 30,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005948,
+          "reassign": 14
+        },
+        {
+          "seed": 20284877,
+          "makespan": 36,
+          "latency_p95": 32,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006671,
+          "reassign": 16
+        },
+        {
+          "seed": 20292796,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.006073,
+          "reassign": 12
+        },
+        {
+          "seed": 20300715,
+          "makespan": 34,
+          "latency_p95": 29,
+          "hi_qos_p95": 34,
+          "imbalance": 0.005314,
+          "reassign": 12
+        },
+        {
+          "seed": 20308634,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005858,
+          "reassign": 16
+        },
+        {
+          "seed": 20316553,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 32,
+          "imbalance": 0.005634,
+          "reassign": 17
+        },
+        {
+          "seed": 20324472,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 26,
+          "imbalance": 0.006567,
+          "reassign": 12
+        },
+        {
+          "seed": 20332391,
+          "makespan": 33,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.005271,
+          "reassign": 12
+        },
+        {
+          "seed": 20340310,
+          "makespan": 30,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.005393,
+          "reassign": 14
+        },
+        {
+          "seed": 20348229,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006049,
+          "reassign": 19
+        },
+        {
+          "seed": 20356148,
+          "makespan": 30,
+          "latency_p95": 26,
+          "hi_qos_p95": 26,
+          "imbalance": 0.005058,
+          "reassign": 12
+        },
+        {
+          "seed": 20364067,
+          "makespan": 33,
+          "latency_p95": 29,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005843,
+          "reassign": 12
+        },
+        {
+          "seed": 20371986,
+          "makespan": 36,
+          "latency_p95": 33,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006884,
+          "reassign": 18
+        },
+        {
+          "seed": 20379905,
+          "makespan": 31,
+          "latency_p95": 30,
+          "hi_qos_p95": 26,
+          "imbalance": 0.004926,
+          "reassign": 12
+        },
+        {
+          "seed": 20387824,
+          "makespan": 38,
+          "latency_p95": 34,
+          "hi_qos_p95": 34,
+          "imbalance": 0.008023,
+          "reassign": 18
+        },
+        {
+          "seed": 20395743,
+          "makespan": 34,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006356,
+          "reassign": 14
+        },
+        {
+          "seed": 20403662,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 30,
+          "imbalance": 0.006622,
+          "reassign": 15
+        },
+        {
+          "seed": 20411581,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005716,
+          "reassign": 18
+        },
+        {
+          "seed": 20419500,
+          "makespan": 33,
+          "latency_p95": 30,
+          "hi_qos_p95": 24,
+          "imbalance": 0.005592,
+          "reassign": 13
+        },
+        {
+          "seed": 20427419,
+          "makespan": 34,
+          "latency_p95": 31,
+          "hi_qos_p95": 32,
+          "imbalance": 0.00722,
+          "reassign": 15
+        },
+        {
+          "seed": 20435338,
+          "makespan": 30,
+          "latency_p95": 28,
+          "hi_qos_p95": 30,
+          "imbalance": 0.004105,
+          "reassign": 11
+        },
+        {
+          "seed": 20443257,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.006872,
+          "reassign": 14
+        },
+        {
+          "seed": 20451176,
+          "makespan": 32,
+          "latency_p95": 31,
+          "hi_qos_p95": 31,
+          "imbalance": 0.004365,
+          "reassign": 14
+        },
+        {
+          "seed": 20459095,
+          "makespan": 28,
+          "latency_p95": 27,
+          "hi_qos_p95": 28,
+          "imbalance": 0.006164,
+          "reassign": 10
+        },
+        {
+          "seed": 20467014,
+          "makespan": 36,
+          "latency_p95": 31,
+          "hi_qos_p95": 28,
+          "imbalance": 0.005694,
+          "reassign": 15
+        },
+        {
+          "seed": 20474933,
+          "makespan": 35,
+          "latency_p95": 29,
+          "hi_qos_p95": 35,
+          "imbalance": 0.005996,
+          "reassign": 12
+        },
+        {
+          "seed": 20482852,
+          "makespan": 35,
+          "latency_p95": 33,
+          "hi_qos_p95": 33,
+          "imbalance": 0.005986,
+          "reassign": 14
+        },
+        {
+          "seed": 20490771,
+          "makespan": 32,
+          "latency_p95": 29,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006469,
+          "reassign": 13
+        },
+        {
+          "seed": 20498690,
+          "makespan": 34,
+          "latency_p95": 33,
+          "hi_qos_p95": 29,
+          "imbalance": 0.006982,
+          "reassign": 16
+        }
+      ],
+      "makespan_median": 34.0,
+      "makespan_min": 28.0,
+      "makespan_max": 38.0,
+      "latency_p95_median": 31.0,
+      "hi_qos_p95_median": 31.0,
+      "latency_mean_median": 15.333,
+      "imbalance_median": 0.006,
+      "reassign_median": 14.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  }
+}

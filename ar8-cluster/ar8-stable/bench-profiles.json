@@ -1,0 +1,145 @@
+{
+  "config": {
+    "shards": 48,
+    "trials": 7,
+    "seed": 20261120,
+    "tiersMix": {
+      "interactive": 0.2,
+      "default": 0.3,
+      "utility": 0.3,
+      "background": 0.2
+    },
+    "failureInjection": false
+  },
+  "workload": {
+    "tierCounts": {
+      "background": 13,
+      "utility": 10,
+      "default": 16,
+      "interactive": 9
+    }
+  },
+  "main": {
+    "nixos-baseline": {
+      "trials": 7,
+      "makespan_median": 129.0,
+      "makespan_min": 116.0,
+      "makespan_max": 137.0,
+      "latency_p95_median": 119.0,
+      "hi_qos_p95_median": 119.0,
+      "latency_mean_median": 61.5,
+      "imbalance_median": 0.11,
+      "reassign_median": 117.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 7,
+      "makespan_median": 152.0,
+      "makespan_min": 136.0,
+      "makespan_max": 177.0,
+      "latency_p95_median": 143.0,
+      "hi_qos_p95_median": 148.0,
+      "latency_mean_median": 73.958,
+      "imbalance_median": 0.099,
+      "reassign_median": 147.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 7,
+      "makespan_median": 139.0,
+      "makespan_min": 133.0,
+      "makespan_max": 157.0,
+      "latency_p95_median": 132.0,
+      "hi_qos_p95_median": 132.0,
+      "latency_mean_median": 64.792,
+      "imbalance_median": 0.096,
+      "reassign_median": 125.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  },
+  "ablationRouterOnly": {
+    "nixos-baseline": {
+      "trials": 7,
+      "makespan_median": 129.0,
+      "makespan_min": 116.0,
+      "makespan_max": 137.0,
+      "latency_p95_median": 119.0,
+      "hi_qos_p95_median": 119.0,
+      "latency_mean_median": 61.5,
+      "imbalance_median": 0.11,
+      "reassign_median": 117.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 7,
+      "makespan_median": 123.0,
+      "makespan_min": 111.0,
+      "makespan_max": 137.0,
+      "latency_p95_median": 119.0,
+      "hi_qos_p95_median": 114.0,
+      "latency_mean_median": 58.625,
+      "imbalance_median": 0.09,
+      "reassign_median": 110.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 7,
+      "makespan_median": 124.0,
+      "makespan_min": 110.0,
+      "makespan_max": 136.0,
+      "latency_p95_median": 117.0,
+      "hi_qos_p95_median": 109.0,
+      "latency_mean_median": 57.271,
+      "imbalance_median": 0.092,
+      "reassign_median": 105.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  },
+  "ablationSystemOnly": {
+    "nixos-baseline": {
+      "trials": 7,
+      "makespan_median": 129.0,
+      "makespan_min": 116.0,
+      "makespan_max": 137.0,
+      "latency_p95_median": 119.0,
+      "hi_qos_p95_median": 119.0,
+      "latency_mean_median": 61.5,
+      "imbalance_median": 0.11,
+      "reassign_median": 117.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "xnu-qos": {
+      "trials": 7,
+      "makespan_median": 151.0,
+      "makespan_min": 130.0,
+      "makespan_max": 175.0,
+      "latency_p95_median": 148.0,
+      "hi_qos_p95_median": 137.0,
+      "latency_mean_median": 74.188,
+      "imbalance_median": 0.095,
+      "reassign_median": 148.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    },
+    "oh-distributed": {
+      "trials": 7,
+      "makespan_median": 143.0,
+      "makespan_min": 133.0,
+      "makespan_max": 159.0,
+      "latency_p95_median": 140.0,
+      "hi_qos_p95_median": 140.0,
+      "latency_mean_median": 67.979,
+      "imbalance_median": 0.097,
+      "reassign_median": 131.0,
+      "done_median": 48.0,
+      "converged_rate": 1.0
+    }
+  }
+}

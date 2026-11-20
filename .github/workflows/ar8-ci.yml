@@ -1,0 +1,134 @@
+# ============================================================
+#  AR8 三版本对照组 —— 云端验证流水线
+#
+#  两条独立 Job：
+#    1) nix-verify  —— 在 GitHub 免费 x86_64-Linux 虚拟机上装 Nix，
+#                       nix eval（9 个 NixOS 变体完整求值）+
+#                       nix build .#ar8（AR8 包构建 + 安装自检）。
+#       补上「本机无 Nix、宿主关机」空白的真机构建验证。
+#    2) bench-verify —— 纯 Python，实跑三版本基准（31 trials 配对检验）
+#                      + 单测 + 敏感性分析，产物上传 artifact。
+#
+#  触发：ar8-cluster/** 有改动、或本文件改动、或手动 workflow_dispatch。
+#  说明：与 build-iso.yml（mirrors 宿主 ISO 构建）完全隔离，互不干扰。
+# ============================================================
+
+name: AR8 三版本验证
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ar8-cluster/**"
+      - ".github/workflows/ar8-ci.yml"
+  workflow_dispatch:       # 手动触发
+    inputs:
+      trials:
+        description: "基准 trial 数（默认 31，快速验证可设 7）"
+        required: false
+        default: "31"
+
+jobs:
+  # ------------------------------------------------------------------
+  # Job 1：Nix 侧真机构建验证（求值 + 构建 + 包自检）
+  # ------------------------------------------------------------------
+  nix-verify:
+    runs-on: ubuntu-latest       # x86_64-linux，与目标平台一致，无需交叉
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: 启用 flake
+        run: |
+          mkdir -p ~/.config/nix
+          echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+
+      # 9 个 NixOS 变体（3 host × 3 profile）完整求值：提前暴露
+      # modules/*.nix 的语法/选项/类型错误。用 toplevel.drvPath 强制全量
+      # 求值（惰性求值只查叶子属性会漏错）。
+      # 注：ar8-cluster/flake.nix 的 nixpkgs.url 是官方 github:NixOS/nixpkgs/nixos-26.05，
+      #     海外 CI 可直连；无 flake.lock 时 nix 会自动 fetch 并生成临时 lock。
+      - name: 校验 NixOS 变体可求值
+        working-directory: ar8-cluster
+        run: |
+          set -o pipefail
+          nix eval --accept-flake-config --raw \
+            .#nixosConfigurations.vm-ar8-node1.config.system.build.toplevel.drvPath
+          nix eval --accept-flake-config --raw \
+            .#nixosConfigurations.vm-ar8-node1-xnu-qos.config.system.build.toplevel.drvPath
+          nix eval --accept-flake-config --raw \
+            .#nixosConfigurations.vm-ar8-node1-oh-distributed.config.system.build.toplevel.drvPath
+          nix eval --accept-flake-config --raw \
+            .#nixosConfigurations.vm-ar8-node2.config.system.build.toplevel.drvPath
+          echo "变体完整求值通过（3 host × 3 profile，抽验 4 个）"
+
+      - name: 构建 AR8 包（含 install 自检）
+        working-directory: ar8-cluster
+        run: |
+          set -o pipefail
+          nix build .#ar8 --accept-flake-config 2>&1 | tee /tmp/build.log
+          echo "=== AR8 包构建产物 ==="
+          ls -R result/ 2>/dev/null | head -40
+          echo "=== 包内自检：版本 + validate ==="
+          AR8_CONFIG="$(pwd)/ar8-stable/ar8.config.yaml" \
+          AR8_STATE_DIR="$(mktemp -d)" \
+            ./result/bin/ar8ctl --version
+          AR8_CONFIG="$(pwd)/ar8-stable/ar8.config.yaml" \
+          AR8_STATE_DIR="$(mktemp -d)" \
+            ./result/bin/ar8ctl validate
+
+      - name: 上传 Nix 构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nix-build-log
+          path: /tmp/build.log
+
+  # ------------------------------------------------------------------
+  # Job 2：三版本基准 + 单测（纯 Python，独立于 Nix 构建）
+  # ------------------------------------------------------------------
+  bench-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装依赖（仅 PyYAML，标准库之外的最小依赖）
+        run: pip install pyyaml
+
+      - name: 单测（含加深后的 profile 语义断言 test_53~56）
+        working-directory: ar8-cluster/ar8-stable
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v 2>&1 | tail -40
+
+      - name: 三版本基准（2 节点 31 trials，配对检验）
+        working-directory: ar8-cluster/ar8-stable
+        run: |
+          TRIALS="${{ github.event.inputs.trials || '31' }}"
+          python3 bench-profiles.py --shards 48 --trials "$TRIALS" \
+            --seed 20261120 --nodes 2 --json bench-2node-dl.json
+          echo "=== 配对显著性检验 ==="
+          python3 bench-stats.py bench-2node-dl.json --metric makespan
+
+      - name: 规模化 + 故障 + 数据本地性
+        working-directory: ar8-cluster/ar8-stable
+        run: |
+          python3 bench-profiles.py --shards 48 --trials 31 --seed 20261120 \
+            --nodes 8 --json bench-8node-dl.json
+          python3 bench-profiles.py --shards 48 --trials 31 --seed 20261120 \
+            --nodes 2 --failure --json bench-failure-dl.json
+          python3 bench-sensitivity.py --trials 15 --homogeneous \
+            --json bench-sensitivity-homo.json
+
+      - name: 上传基准产物
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ar8-bench-results
+          path: |
+            ar8-cluster/ar8-stable/bench-2node-dl.json
+            ar8-cluster/ar8-stable/bench-8node-dl.json
+            ar8-cluster/ar8-stable/bench-failure-dl.json
+            ar8-cluster/ar8-stable/bench-sensitivity-homo.json
