@@ -232,7 +232,12 @@ in
       serverAddr = lib.mkIf (cfg.workload.kubernetes.serverAddr != "") cfg.workload.kubernetes.serverAddr;
       nodeIP = lib.mkIf (cfg.workload.kubernetes.nodeIP != null) cfg.workload.kubernetes.nodeIP;
     };
-    environment.systemPackages = lib.mkIf cfg.workload.kubernetes.enable [ pkgs.k3s ];
+    # ⚠️ environment.systemPackages 在本模块只允许出现一次（NixOS 同模块内重复
+    # 定义同一选项会报 "already defined"）。k3s 与 AR8 包都必须并到这里，不能各写一处。
+    # 云端 nix eval 抓出过这个错误：曾在第 235 行（k3s）与第 299 行（AR8 包）重复定义。
+    environment.systemPackages =
+      lib.mkIf cfg.workload.kubernetes.enable [ pkgs.k3s ]
+      ++ lib.mkIf cfg.demo.enable [ cfg.package ];
 
     # k3s 多节点所需端口（NixOS 防火墙默认全拒，必须显式放开）：
     #   6443/TCP  apiserver；2379/2380/TCP  etcd（多 server HA）；
@@ -277,38 +282,30 @@ in
       '';
     };
 
-    # ---- 容器镜像加速（国内必需）----
-    environment.etc."rancher/k3s/registries.yaml" =
-      lib.mkIf (cfg.workload.kubernetes.registryMirrors != [ ]) {
-        text = lib.concatStringsSep "\n" (
-          [ "mirrors:" "  docker.io:" "    endpoint:" ]
-          ++ map (m: "      - \"${m}\"") cfg.workload.kubernetes.registryMirrors
-        ) + "\n";
-      };
-
-    # ---- 稳定核心：作为单个 Nix 包注入系统（替代原先逐个 environment.etc 散装分发）----
-    #
-    # 为什么要改成包：
-    #   1. 可复现：整份 AR8 是一个 store 路径，内容哈希固定，能审计能回滚；
-    #   2. 依赖固化：python3 + PyYAML 经 makeWrapper 固化进 wrapper，
-    #      不再依赖宿主 PATH 里的 python3（node1 实测没有）；
-    #   3. 单一真值源：包源直接取自仓库 ar8-stable/，不再有「复制一份」的漂移风险。
-    #
-    # ⚠️ /nix/store 只读，因此：真值源装到 /etc/ar8（只读副本），
-    #    可写状态走 /var/lib/ar8（由 systemd StateDirectory 创建）。
-    environment.systemPackages = lib.mkIf cfg.demo.enable [ cfg.package ];
-
-    # 真值源下发：安装位置必须跟 configFile 一致。
-    # ⚠️ 不要在 environment.etc 里写死 "ar8/ar8.config.yaml" —— 那样一旦用户覆盖
-    # configFile，副本还是装到 /etc/ar8，运行时却去读别处，直接「配置文件不存在」。
-    # 这里用 hasPrefix 判定：路径在 /etc 下就交给 environment.etc 声明式安装，
-    # 否则用 tmpfiles 软链到 store（保持只读、可复现）。
-    environment.etc = lib.mkIf (cfg.demo.enable && lib.hasPrefix "/etc/" cfg.configFile) {
-      ${lib.removePrefix "/etc/" cfg.configFile} = {
-        source = "${cfg.package}/lib/ar8/ar8.config.yaml";
-        mode = "0444";
-      };
-    };
+    # ---- 配置下发：镜像加速 + AR8 真值源，都用 environment.etc 这一处声明 ----
+    # ⚠️ environment.etc 在本模块只允许出现一次（同模块重复定义同一选项报
+    # "already defined"）。曾把 registries.yaml 与 ar8.config.yaml 分两处写，
+    # 云端 nix eval 报错；这里用 lib.mkMerge 合并，条件各自独立。
+    environment.etc = lib.mkMerge [
+      (lib.mkIf (cfg.workload.kubernetes.registryMirrors != [ ]) {
+        "rancher/k3s/registries.yaml" = {
+          text = lib.concatStringsSep "\n" (
+            [ "mirrors:" "  docker.io:" "    endpoint:" ]
+            ++ map (m: "      - \"${m}\"") cfg.workload.kubernetes.registryMirrors
+          ) + "\n";
+        };
+      })
+      # 真值源下发：安装位置必须跟 configFile 一致。
+      # ⚠️ 不要在 environment.etc 里写死 "ar8/ar8.config.yaml" —— 那样一旦用户覆盖
+      # configFile，副本还是装到 /etc/ar8，运行时却去读别处，直接「配置文件不存在」。
+      # 这里用 hasPrefix 判定：路径在 /etc 下就交给 environment.etc 声明式安装。
+      (lib.mkIf (cfg.demo.enable && lib.hasPrefix "/etc/" cfg.configFile) {
+        ${lib.removePrefix "/etc/" cfg.configFile} = {
+          source = "${cfg.package}/lib/ar8/ar8.config.yaml";
+          mode = "0444";
+        };
+      })
+    ];
 
     # 可写状态目录 + workload 清单软链（合并为一处，避免重复定义同一选项）
     # ⚠️ 清单只软链、不复制：内容来自 store（只读、可复现），复制副本会引入漂移。

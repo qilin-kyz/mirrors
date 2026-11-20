@@ -46,39 +46,67 @@ in
     #   给它们降速省的时间补不回交互档的收益。
     #   正解：低档保持默认权重 100，只给 interactive 提权到 150。
     #   扫描结果 ms=121（比基线快 5%）。cgroup 权重与基准的 qosSpeed 语义对齐。
-    systemd.slices = lib.mkIf isQos {
-      ar8-background = {
-        description = "AR8 QoS0 background（批量扫描，保持默认权重）";
-        sliceConfig = {
-          CPUWeight = 100;
-          IOWeight = 100;
-          MemoryHigh = "70%";
+    # ⚠️ systemd.slices 是 attrsOf 类型，同模块内只能出现一次整体赋值；
+    # 下面 isOh 分支还有 systemd.slices.ar8-reserved 子路径，两处会冲突
+    # （和 environment.etc 的报错同构）。必须合并为单一 mkMerge。
+    systemd.slices = lib.mkMerge [
+      (lib.mkIf isQos {
+        ar8-background = {
+          description = "AR8 QoS0 background（批量扫描，保持默认权重）";
+          sliceConfig = {
+            CPUWeight = 100;
+            IOWeight = 100;
+            MemoryHigh = "70%";
+          };
         };
-      };
-      ar8-utility = {
-        description = "AR8 QoS1 utility（普通后台计算，保持默认权重）";
-        sliceConfig = { CPUWeight = 100; IOWeight = 100; MemoryHigh = "70%"; };
-      };
-      ar8-default = {
-        description = "AR8 QoS2 default（常规作业）";
-        sliceConfig = { CPUWeight = 100; IOWeight = 100; };
-      };
-      ar8-interactive = {
-        description = "AR8 QoS3 user-interactive（延迟敏感，提权但不硬扣其它档）";
-        sliceConfig = {
-          CPUWeight = 150;    # 对应 qosSpeed interactive=1.15
-          IOWeight = 150;
-          # 实时任务不受 MemoryHigh 软限，避免压缩换出带来长尾
+        ar8-utility = {
+          description = "AR8 QoS1 utility（普通后台计算，保持默认权重）";
+          sliceConfig = { CPUWeight = 100; IOWeight = 100; MemoryHigh = "70%"; };
         };
-      };
-    };
+        ar8-default = {
+          description = "AR8 QoS2 default（常规作业）";
+          sliceConfig = { CPUWeight = 100; IOWeight = 100; };
+        };
+        ar8-interactive = {
+          description = "AR8 QoS3 user-interactive（延迟敏感，提权但不硬扣其它档）";
+          sliceConfig = {
+            CPUWeight = 150;    # 对应 qosSpeed interactive=1.15
+            IOWeight = 150;
+            # 实时任务不受 MemoryHigh 软限，避免压缩换出带来长尾
+          };
+        };
+      })
+      (lib.mkIf isOh {
+        ar8-reserved = {
+          description = "AR8 控制面优先（确定时延：提权而非硬扣其它任务的容量）";
+          sliceConfig = {
+            CPUWeight = 350;
+            IOWeight = 300;
+            # 不设 CPUQuota —— 实测硬扣会让整体吞吐显著下降
+          };
+        };
+      })
+    ];
 
     # XNU 的 libdispatch 让高 QoS 队列优先拿到 CPU；Linux 侧等价手段是
     # 提高调度优先级 + 锁定性能模式（减少频率爬升延迟）。
-    boot.kernel.sysctl = lib.mkIf isQos {
-      "kernel.sched_autogroup_enabled" = 0;   # 关闭按 tty 分组，避免批处理拖慢交互
-      "kernel.sched_migration_cost_ns" = 500000;  # 降低迁移频率，减少缓存抖动
-    };
+    #
+    # 注意：boot.kernel.sysctl 在本模块会被 isQos / isOh 两个条件分别命中，
+    # 必须合并为单一属性（mkMerge），否则 NixOS 报同一模块重复定义。
+    boot.kernel.sysctl = lib.mkMerge [
+      (lib.mkIf isQos {
+        "kernel.sched_autogroup_enabled" = 0;   # 关闭按 tty 分组，避免批处理拖慢交互
+        "kernel.sched_migration_cost_ns" = 500000;  # 降低迁移频率，减少缓存抖动
+      })
+      (lib.mkIf isOh {
+        # 软总线：降低小包延迟（作业分片调度指令都是小包）
+        "net.ipv4.tcp_low_latency" = 1;
+        "net.ipv4.tcp_nodelay" = 1;
+        # 确定时延：减少内核抢占点带来的不确定停顿
+        "kernel.sched_min_granularity_ns" = 2000000;
+        "kernel.sched_wakeup_granularity_ns" = 3000000;
+      })
+    ];
 
     # ======================================================================
     # 版本三：OpenHarmony 分布式调度
@@ -96,23 +124,7 @@ in
     # p=0.0000）—— 它无差别扣掉 background/utility（占 48%）的算力，
     # 而节点根本没被打满。已改为「不常驻预留」：只对控制面 slice 提高权重，
     # 不设 CPUQuota 硬扣。等价于基准里 reservedCapacity=0 的设定。
-    systemd.slices.ar8-reserved = lib.mkIf isOh {
-      description = "AR8 控制面优先（确定时延：提权而非硬扣其它任务的容量）";
-      sliceConfig = {
-        CPUWeight = 350;
-        IOWeight = 300;
-        # 不设 CPUQuota —— 实测硬扣会让整体吞吐显著下降
-      };
-    };
-
-    boot.kernel.sysctl = lib.mkIf isOh {
-      # 软总线：降低小包延迟（作业分片调度指令都是小包）
-      "net.ipv4.tcp_low_latency" = 1;
-      "net.ipv4.tcp_nodelay" = 1;
-      # 确定时延：减少内核抢占点带来的不确定停顿
-      "kernel.sched_min_granularity_ns" = 2000000;
-      "kernel.sched_wakeup_granularity_ns" = 3000000;
-    };
+    # （ar8-reserved 的 slice 定义已并入上面的 systemd.slices mkMerge，不在此重复。）
 
     # 软总线服务：一个极简 TCP broker，负责节点能力广播与任务出价收集。
     # 不需要单独装包 —— 复用 ar8 包里的 ar8ctl job（现有 9100 broker）即可。
