@@ -66,7 +66,7 @@ jobs:
                    001-thinkpad-x270-geo-distributed \
                    ar8-geo-standalone ar8-1.0; do
             if ! nix eval --accept-flake-config --raw \
-                 ".#nixosConfigurations.${c}.config.system.build.toplevel.drvPath" \
+                 ".#nixosConfigurations.\"${c}\".config.system.build.toplevel.drvPath" \
                  2>&1 | tee /tmp/eval.log; then
               MSG=$(tail -40 /tmp/eval.log | head -c 1800)
               MSG="${MSG//'%'/'%25'}"
@@ -132,7 +132,7 @@ jobs:
         working-directory: ar8-cluster
         run: |
           set -o pipefail
-          if ! nix build .#nixosConfigurations.ar8-1.0.config.system.build.toplevel \
+          if ! nix build '.#nixosConfigurations."ar8-1.0".config.system.build.toplevel' \
                --accept-flake-config --print-out-paths 2>&1 | tee /tmp/ar810-build.log; then
             MSG=$(tail -40 /tmp/ar810-build.log | head -c 1800)
             MSG="${MSG//'%'/'%25'}"
@@ -143,7 +143,7 @@ jobs:
           fi
           echo "=== AR8 1.0 系统闭包 ==="
           nix eval --accept-flake-config --raw \
-            ".#nixosConfigurations.ar8-1.0.config.services.ar8.systemProfile"
+            ".#nixosConfigurations.\"ar8-1.0\".config.services.ar8.systemProfile"
           echo "(期望 geo-distributed)"
           nix eval --accept-flake-config --raw \
             ".#ar8.version"

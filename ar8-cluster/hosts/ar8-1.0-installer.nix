@@ -47,7 +47,7 @@ let
     # 定位 flake 源码（随盘在 /etc/ar8-flake，若不存在则取当前源码树）
     FLAKE="''${AR8_FLAKE:-/etc/ar8-flake}"
     echo "== nixos-install --flake $FLAKE#ar8-1.0 =="
-    nixos-install --flake "$FLAKE#ar8-1.0" "$@"
+    nixos-install --flake "$FLAKE#\"ar8-1.0\"" "$@"
     echo "== 安装完成。umount 后 reboot 即可进入 AR8 1.0 系统 =="
   '';
 in
