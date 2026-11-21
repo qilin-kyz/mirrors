@@ -34,7 +34,7 @@ let
     partprobe "$DISK" || true
     sleep 2
 
-    # 分区设备名（NVMe 是 ${DISK}p1 形式，SATA 是 ${DISK}1 形式）
+    # 分区设备名（NVMe 是 ''${DISK}p1 形式，SATA 是 ''${DISK}1 形式）
     if [ -e "''${DISK}p1" ]; then P="''${DISK}p"; else P="''${DISK}"; fi
     mkfs.vfat -F 32 -n EFI "''${P}1"
     mkfs.ext4 -L nixos "''${P}2"
