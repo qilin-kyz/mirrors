@@ -139,6 +139,13 @@ jobs:
           python3 bench-sensitivity.py --trials 15 --homogeneous \
             --json bench-sensitivity-homo.json
 
+      - name: 调度器 wall-clock 吞吐（单决策开销 + 端到端 + 节点规模退化）
+        working-directory: ar8-cluster/ar8-stable
+        run: |
+          python3 bench-router-throughput.py --decisions 200000 --nodes 2 \
+            --iters 5 --shards 48 --trials 50 --sweep-nodes 8 \
+            --json bench-router-throughput.json
+
       - name: 上传基准产物
         if: always()
         uses: actions/upload-artifact@v4
@@ -149,3 +156,4 @@ jobs:
             ar8-cluster/ar8-stable/bench-8node-dl.json
             ar8-cluster/ar8-stable/bench-failure-dl.json
             ar8-cluster/ar8-stable/bench-sensitivity-homo.json
+            ar8-cluster/ar8-stable/bench-router-throughput.json

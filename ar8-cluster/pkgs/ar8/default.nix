@@ -93,7 +93,8 @@ stdenv.mkDerivation {
 
     # --- 核心 Python（必须平铺：ar8ctl 用 __file__ 同目录加载 ar8-bandwidth.py）---
     for f in ar8core.py ar8ctl.py ar8-bandwidth.py ar8-capacity.py capability.py \
-             ar8-profiles.py bench-profiles.py bench-stats.py bench-sensitivity.py; do
+             ar8-profiles.py bench-profiles.py bench-stats.py bench-sensitivity.py \
+             bench-router-throughput.py; do
       install -m 0644 "$src/$f" "$out_py/$f"
     done
 
@@ -177,6 +178,12 @@ stdenv.mkDerivation {
     makeWrapper "${pythonEnv}/bin/python3" \
       "$out_bin/ar8-bench-stats" \
       --add-flags "$out_py/bench-stats.py" \
+      --prefix PATH : "${lib.makeBinPath [ bash coreutils ]}"
+
+    # 调度器 wall-clock 吞吐入口：测「调度算法本身」的真实 CPU 开销
+    makeWrapper "${pythonEnv}/bin/python3" \
+      "$out_bin/ar8-router-throughput" \
+      --add-flags "$out_py/bench-router-throughput.py" \
       --prefix PATH : "${lib.makeBinPath [ bash coreutils ]}"
 
 
