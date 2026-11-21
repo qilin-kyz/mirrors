@@ -1,19 +1,17 @@
 # ============================================================
 #  AR8 四版本对照组 —— 云端验证流水线
 #
-#  两条独立 Job：
-#    1) nix-verify  —— 在 GitHub 免费 x86_64-Linux 虚拟机上装 Nix，
-#                       nix eval（12 个 NixOS 变体完整求值）+
-#                       nix build .#ar8（AR8 包构建 + 安装自检）。
-#       补上「本机无 Nix、宿主关机」空白的真机构建验证。
-#    2) bench-verify —— 纯 Python，实跑四版本基准（31 trials 配对检验）
-#                      + 单测 + 敏感性分析，产物上传 artifact。
+#  三条独立 Job（并行）：
+#    1) nix-verify   —— nix eval（13 个变体完整求值）+ nix build .#ar8（包自检）。
+#    2) geo-sys      —— 第四方案落地：真实构建 geo-distributed 系统闭包 +
+#                       从零构建可引导安装 ISO，产物上传 artifact 供下载。
+#    3) bench-verify —— 纯 Python，实跑四版本基准（31 trials 配对检验）+ 单测。
 #
 #  触发：ar8-cluster/** 有改动、或本文件改动、或手动 workflow_dispatch。
 #  说明：与 build-iso.yml（mirrors 宿主 ISO 构建）完全隔离，互不干扰。
 # ============================================================
 
-name: AR8 三版本验证
+name: AR8 四版本验证
 
 on:
   push:
@@ -30,7 +28,7 @@ on:
 
 jobs:
   # ------------------------------------------------------------------
-  # Job 1：Nix 侧真机构建验证（求值 + 构建 + 包自检）
+  # Job 1：Nix 侧真机构建验证（求值 + 包自检）
   # ------------------------------------------------------------------
   nix-verify:
     runs-on: ubuntu-latest       # x86_64-linux，与目标平台一致，无需交叉
@@ -46,7 +44,7 @@ jobs:
           mkdir -p ~/.config/nix
           echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
-      # 12 个 NixOS 变体（3 host × 4 profile）完整求值：提前暴露
+      # 13 个变体（3 host × 4 profile + geo 独立整机）完整求值：提前暴露
       # modules/*.nix 的语法/选项/类型错误。用 toplevel.drvPath 强制全量
       # 求值（惰性求值只查叶子属性会漏错）。
       # 注：ar8-cluster/flake.nix 的 nixpkgs.url 是官方 github:NixOS/nixpkgs/nixos-26.05，
@@ -65,7 +63,8 @@ jobs:
                    vm-ar8-node2-oh-distributed vm-ar8-node2-geo-distributed \
                    001-thinkpad-x270 001-thinkpad-x270-xnu-qos \
                    001-thinkpad-x270-oh-distributed \
-                   001-thinkpad-x270-geo-distributed; do
+                   001-thinkpad-x270-geo-distributed \
+                   ar8-geo-standalone; do
             if ! nix eval --accept-flake-config --raw \
                  ".#nixosConfigurations.${c}.config.system.build.toplevel.drvPath" \
                  2>&1 | tee /tmp/eval.log; then
@@ -78,7 +77,7 @@ jobs:
               break
             fi
           done
-          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 4 profile）"
+          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 4 profile + geo 独立整机）"
 
       - name: 构建 AR8 包（含 install 自检）
         working-directory: ar8-cluster
@@ -110,7 +109,79 @@ jobs:
           path: /tmp/build.log
 
   # ------------------------------------------------------------------
-  # Job 2：三版本基准 + 单测（纯 Python，独立于 Nix 构建）
+  # Job 2：第四方案落地 —— geo-distributed 系统闭包 + 可引导安装 ISO
+  # ------------------------------------------------------------------
+  geo-sys:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: 启用 flake
+        run: |
+          mkdir -p ~/.config/nix
+          echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+
+      # 第四方案落地（方案A）：真实构建 geo-distributed 系统闭包。
+      # 不只是 eval —— 跑出完整的 /nix/store/...-nixos-system，证明
+      # 「能把 geo-distributed 打包成系统」不是纸面声明。构建后取证 systemProfile。
+      - name: 构建 geo-distributed 独立整机系统闭包（toplevel）
+        working-directory: ar8-cluster
+        run: |
+          set -o pipefail
+          if ! nix build .#nixosConfigurations.ar8-geo-standalone.config.system.build.toplevel \
+               --accept-flake-config --print-out-paths 2>&1 | tee /tmp/geo-build.log; then
+            MSG=$(tail -40 /tmp/geo-build.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::geo-distributed 系统闭包构建失败:${MSG}"
+            exit 1
+          fi
+          echo "=== geo-distributed 系统闭包 ==="
+          nix eval --accept-flake-config --raw \
+            ".#nixosConfigurations.ar8-geo-standalone.config.services.ar8.systemProfile"
+          echo "(期望输出 geo-distributed)"
+
+      - name: 上传 geo-distributed 系统闭包构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ar8-geo-system-closure-log
+          path: /tmp/geo-build.log
+
+      # 第四方案落地（方案B）：从零构建 geo-distributed 可引导安装 ISO。
+      # 一张盘刻录/挂载后跑 ar8-geo-install 或 nixos-install --flake #ar8-geo-standalone，
+      # 装出来的就是 geo-distributed 系统。产物 ISO 上传 + 发 Release 供下载。
+      - name: 构建 geo-distributed 安装 ISO
+        working-directory: ar8-cluster
+        run: |
+          set -o pipefail
+          if ! nix build .#iso --accept-flake-config 2>&1 | tee /tmp/geo-iso.log; then
+            MSG=$(tail -40 /tmp/geo-iso.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::geo-distributed ISO 构建失败:${MSG}"
+            exit 1
+          fi
+          echo "=== ISO 产物 ==="
+          ls -la result/iso/
+
+      - name: 上传 geo-distributed ISO
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ar8-geo-installer-iso
+          path: result/iso/*.iso
+          compression-level: 0   # ISO 已压缩，不再二次压缩
+
+  # ------------------------------------------------------------------
+  # Job 3：四版本基准 + 单测（纯 Python，独立于 Nix 构建）
   # ------------------------------------------------------------------
   bench-verify:
     runs-on: ubuntu-latest

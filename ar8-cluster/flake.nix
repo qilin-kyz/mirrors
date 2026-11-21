@@ -29,8 +29,8 @@
 
       # ---- NixOS 系统配置变体工厂 ----
       #
-      # 三版本变体：同一份 host 配置 + 不同的 services.ar8.systemProfile。
-      # 三个版本共用同一套 FSM / 真值源 / AR8 包，只换调度策略与系统层参数。
+      # 四版本变体：同一份 host 配置 + 不同的 services.ar8.systemProfile。
+      # 四个版本共用同一套 FSM / 真值源 / AR8 包，只换调度策略与系统层参数。
       # 命名规则：<host>-<profile>，baseline 变体不带后缀（保持向后兼容）。
       #
       # ⚠️ 必须放在 let 块：nixosConfigurations 要引用它，而 outputs 返回的
@@ -72,6 +72,8 @@
     in
     {
       # ---- 包输出（nix build / nix run）----
+      # iso 只对 x86_64-linux 有意义（安装盘），用 optionalAttrs 并在 forAllSystems
+      # 单一定义里合并，避免同 attrset 里 packages 键出现两次（会报 already defined）。
       packages = forAllSystems ({ system, pkgs }:
         let
           p = pkgs.extend overlay;
@@ -79,6 +81,8 @@
         {
           ar8 = p.ar8;
           default = p.ar8;
+        } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          iso = self.nixosConfigurations.ar8-geo-installer.config.system.build.isoImage;
         });
 
       # ---- overlay：让 nixpkgs 里出现 pkgs.ar8 ----
@@ -87,7 +91,29 @@
       nixosConfigurations =
         (mkVariants "001-thinkpad-x270" ./hosts/001-thinkpad-x270.nix)
         // (mkVariants "vm-ar8-node1" ./hosts/vm-ar8-node1.nix)
-        // (mkVariants "vm-ar8-node2" ./hosts/vm-ar8-node2.nix);
+        // (mkVariants "vm-ar8-node2" ./hosts/vm-ar8-node2.nix)
+        // {
+          # ---- 第四方案独立整机：装机后就是 geo-distributed 系统 ----
+          ar8-geo-standalone = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              { nixpkgs.overlays = [ overlay ]; }
+              ./hosts/ar8-geo-standalone.nix
+            ];
+          };
+          # ---- 第四方案安装 ISO（可引导装机盘，flake 源码随盘离线可装）----
+          # 一张盘装多台：nixos-install --flake <path>#ar8-geo-standalone
+          # 或盘内入口 ar8-geo-install /dev/<磁盘>
+          ar8-geo-installer = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = { inherit self; };   # flake 源码随盘（storeContents）
+            modules = [
+              { nixpkgs.overlays = [ overlay ]; }
+              "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-base.nix"
+              ./hosts/ar8-geo-installer.nix
+            ];
+          };
+        };
 
       # 未来节点在此追加（共享同一 cluster-base 模块，只覆盖差异）：
       # 注意新节点也要带上 { nixpkgs.overlays = [ overlay ]; } 才能用 pkgs.ar8
