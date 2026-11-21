@@ -7,12 +7,21 @@
   所以这里做的是「借设计，不借代码」：三个版本共用同一份 reconcile FSM、
   同一套 6 条不变量、同一份真值源，只替换 Router 决策函数 + 系统层参数。
 
-三个版本：
+四个版本：
   nixos-baseline   容量加权 vruntime（现有实现，ar8core.Router）
   xnu-qos          借 XNU 的 QoS 分级：任务分 4 档，高 QoS 走高能力节点，
                    并用权重放大其执行速度；低 QoS 被让位（加 vruntime 债）
   oh-distributed   借 OpenHarmony 分布式任务调度：节点能力协商 + 出价拍卖
                    （预计完成时间 + 积压惩罚 + 通信代价），带容量预留防抖动
+  geo-distributed  传输经济学调度（三重差距专用）：节点对传输矩阵（延迟≠带宽）
+                   + 可重算/不可重算区分，融合 OH 的信任降级与 XNU 的吞吐/延迟分化
+
+geo-distributed 的建模哲学（借多方真实系统思想，不借代码）：
+  - 延迟 ≠ 带宽：远是光速 RTT 硬顶，「机房不烂」是 Gbps 出口 —— 二者分开建模。
+  - 传输 vs 重算经济学（Spark lineage / Snowflake 下推 / CDN 边缘计算）：
+    可重算中间结果甩到快节点重算；不可重算原始数据必须搬（瓶颈=源上行 vs 目标下行）。
+  - 融合点：继承 OH 的节点健康信任降级（假恢复规避）；吸收 XNU 的
+    吞吐/延迟分化（交互任务对 RTT 敏感、批处理任务对带宽敏感）。
 
 全部严格确定性：无 random、无时间依赖，平局按配置节点顺序打破，可逐字节回放。
 """
@@ -81,10 +90,34 @@ PROFILES: Dict[str, Dict[str, Any]] = {
             "zram": "lz4/50%",
         },
     },
+    "geo-distributed": {
+        "label": "传输经济学调度版（三重差距）",
+        "origin": "Spark lineage + Snowflake 下推 + CDN 边缘 + OSPF 链路代价",
+        "router": "ar8-profiles.GeoDistributedRouter",
+        "system": {
+            "cpuWeight": {"batch": 50, "control": 300},
+            "qosSpeed": {},
+            "reservedCapacity": 0.0,
+            "commCost": 0.0,
+            # 传输经济学：可重算数据甩快节点重算、不可重算数据按瓶颈带宽搬移。
+            # 数据代价由 GeoDistributedRouter 从 topology + node.region/bwMbps 实时
+            # 计算，不在这里设单值常数 —— 这正是它区别于 OH「单值 dataMoveCost」的地方。
+            "dataMoveCost": 0.0,
+            "zram": "lz4/50%",
+        },
+    },
 }
 
 TIERS = ("background", "utility", "default", "interactive")
 TIER_RANK = {t: i for i, t in enumerate(TIERS)}
+
+# geo-distributed 的统一量纲（与 bench-triple-gap.py 保持一致，保证公平口径）：
+# 1 tick = 100ms；weight=1 节点每 tick 消化 300 个工作量单位；重算 1MB ≈ 6 个单位。
+TICK_MS = 100.0
+PER_TICK_UNITS = 300.0
+RECOMPUTE_UNITS_PER_MB = 6.0
+# 节点缺省带宽（MB/s）：未声明 bwMbps 时按 1GbE 保守取值（= bench 的 "gbe" 档）。
+DEFAULT_BW_MBPS = 110.0
 
 
 def infer_tier(cost: float) -> str:
@@ -162,7 +195,9 @@ class XnuQosRouter(ar8core.Router):
 
     def pick(self, available: Iterable[str], cost: float,
              sid: str | None = None, tier: str | None = None,
-             home: str | None = None) -> str:
+             home: str | None = None,
+             dataSize: float | None = None,
+             recomputable: bool | None = None) -> str:
         qos = tier or infer_tier(cost)
         need = TIER_RANK[qos]
         cands = [nid for nid in self.order
@@ -324,7 +359,9 @@ class OhDistributedRouter(ar8core.Router):
 
     def pick(self, available: Iterable[str], cost: float,
              sid: str | None = None, tier: str | None = None,
-             home: str | None = None) -> str:
+             home: str | None = None,
+             dataSize: float | None = None,
+             recomputable: bool | None = None) -> str:
         qos = tier or infer_tier(cost)
         if sid is not None and home:
             self.data_home[sid] = home
@@ -383,6 +420,175 @@ class OhDistributedRouter(ar8core.Router):
 
 
 # ---------------------------------------------------------------------------
+# 2b. 传输经济学调度（geo-distributed）：三重差距专用
+# ---------------------------------------------------------------------------
+
+class GeoDistributedRouter(OhDistributedRouter):
+    """感知「性能 / 带宽 / 地域 + 数据可重算性」的调度器。
+
+    借多方思想（不借代码）：
+      - Spark lineage / Snowflake 下推 / CDN 边缘计算：可重算中间结果甩到快节点
+        重算；不可重算原始数据必须搬。这是「传输 vs 重算」经济学。
+      - OSPF/BGP / CockroachDB 拓扑感知：出价里带节点对链路代价（延迟≠带宽）。
+
+    融合（继承自 OH + 吸收自 XNU）：
+      1. 继承 OH 的节点健康信任降级（假恢复规避）：刚掉线/恢复的节点在
+         信任窗口内被加价，防止任务被立刻塞回又踩一脚。
+      2. 吸收 XNU 的吞吐/延迟分化：交互档对跨域 RTT 额外敏感（纯吃延迟），
+         批处理档由带宽主导（大数据吞吐摊平延迟）。
+
+    出价函数：
+        bid = 排队 tick + 计算 tick + 数据 tick
+      - 数据 tick（可重算） = size × R / (weight × PER_TICK) —— 与带宽无关；
+      - 数据 tick（不可重算） = (RTT + size / min(源上行, 目标下行)) / TICK_MS。
+      瓶颈带宽 = 两端较小者，因为不可重算数据必须从「数据源窄上行」送出来。
+    """
+
+    # 融合自 XNU：交互/默认档延迟敏感，utility/background 批处理吞吐导向。
+    LATENCY_TIERS = ("interactive", "default")
+    THROUGHPUT_TIERS = ("utility", "background")
+    # 交互任务对跨域 RTT 的额外敏感系数（>1 放大延迟惩罚，留本域优先）。
+    LATENCY_RTT_WEIGHT = 1.5
+    # 无 topology 时的缺省地域（退化同机房，向后兼容）。
+    DEFAULT_REGION = "site-a"
+    # 无明确 RTT 条目时的保守缺省（ms）。
+    DEFAULT_RTT_MS = 120.0
+
+    def __init__(self, cfg: Dict[str, Any]):
+        # 直接走基类 Router 的初始化（跳过 Oh 的 __init__ 以免读到 oh 的 system），
+        # 再手工补齐 Oh 的信任降级字段。
+        ar8core.Router.__init__(self, cfg)
+        sys = PROFILES["geo-distributed"]["system"]
+        self.reserve = float(sys["reservedCapacity"])
+        self.comm = float(sys["commCost"])
+        self.data_move = float(sys["dataMoveCost"])
+        self.tier_map: Dict[str, str] = {}
+        # 数据 home 映射（sid -> 节点）。用 home_map 作为主名（与基准环境 env.home_map
+        # 及 test_57-59 的约定一致），同时保留 Oh 基类的 data_home 别名指向同一 dict，
+        # 让继承来的 snapshot()（走 Oh 实现读 data_home）与 geo 自己的出价读 home_map
+        # 天然一致，避免「数据所在节点」物理事实在三处漂移。
+        self.home_map: Dict[str, str] = {}
+        self.data_home = self.home_map
+        self.node_unstable_at: Dict[str, int] = {nid: 0 for nid in self.order}
+        self.now = 0
+
+        # 传输矩阵：从真值源 topology 段读取（regions + 地域对 RTT 矩阵）。
+        topo = cfg.get("topology") or {}
+        self.regions: set = set(topo.get("regions", []))
+        rtt: Dict[Tuple, float] = {}
+        for k, v in (topo.get("rttMs") or {}).items():
+            if isinstance(k, str) and "|" in k:
+                a, b = k.split("|", 1)
+                rtt[(a, b)] = float(v)
+            elif isinstance(k, (list, tuple)) and len(k) == 2:
+                a, b = k
+                rtt[(a, b)] = float(v)
+        self.rtt = rtt
+
+        # 节点地域 / 带宽 / 算力权重。
+        self.region: Dict[str, str] = {
+            n["id"]: n.get("region", self.DEFAULT_REGION) for n in cfg.get("nodes", [])
+        }
+        self.bw: Dict[str, float] = {
+            n["id"]: float(n.get("bwMbps") or DEFAULT_BW_MBPS) for n in cfg.get("nodes", [])
+        }
+        # 算力权重：优先用显式 _weight（bench 的真实机型权重），否则回落到
+        # 基类 node_capacity（class × 内存开方）——保证同一路由器既能在
+        # 真实 config（无 _weight）下运行，也能在基准（带 _weight）下运行。
+        self.weight: Dict[str, float] = {}
+        for nid in self.order:
+            node = self.nodes.get(nid, {})
+            w = node.get("_weight")
+            self.weight[nid] = float(w) if isinstance(w, (int, float)) else self.capacity.get(nid, 0.5)
+
+        # 数据属性账本（由 reconcile 透传的 dataSizeMb / recomputable 填充）。
+        self.size_map: Dict[str, float] = {}
+        self.recompute_map: Dict[str, bool] = {}
+
+    def effective_capacity(self, nid: str) -> float:
+        """统一用真实算力权重，避免基类 class×mem 与 _weight 打架。"""
+        return max(self.weight.get(nid, self.capacity.get(nid, 0.5)), 1e-6)
+
+    def _rtt_ms(self, ra: str, rb: str) -> float:
+        if ra == rb:
+            return self.rtt.get((ra, rb), 0.05)
+        return self.rtt.get((ra, rb), self.rtt.get((rb, ra), self.DEFAULT_RTT_MS))
+
+    def _calc_ticks(self, nid: str, cost_units: float) -> float:
+        return cost_units / (self.effective_capacity(nid) * PER_TICK_UNITS)
+
+    def _data_ticks(self, nid: str, sid: str | None) -> float:
+        """分片落在 nid 上时，为「数据可用」付出的额外 tick（传输经济学）。"""
+        if sid is None:
+            return 0.0
+        home = self.home_map.get(sid)
+        if home is None or home == nid:
+            return 0.0
+        size = self.size_map.get(sid, 0.0)
+        w = self.effective_capacity(nid)
+        if self.recompute_map.get(sid, False):
+            # 可重算：在落点重新生成，代价只与算力有关（与带宽/地域无关）
+            return size * RECOMPUTE_UNITS_PER_MB / (w * PER_TICK_UNITS)
+        # 不可重算：必须搬。瓶颈 = 数据源上行 vs 落点下行的较小带宽。
+        bw = min(self.bw.get(home, DEFAULT_BW_MBPS), self.bw.get(nid, DEFAULT_BW_MBPS))
+        rtt = self._rtt_ms(self.region.get(home, ""), self.region.get(nid, ""))
+        return (rtt + (size / max(bw, 1e-6)) * 1000.0) / TICK_MS
+
+    def pick(self, available: Iterable[str], cost: float,
+             sid: str | None = None, tier: str | None = None,
+             home: str | None = None,
+             dataSize: float | None = None,
+             recomputable: bool | None = None) -> str:
+        qos = tier or infer_tier(cost)
+        if sid is not None:
+            if home:
+                self.home_map[sid] = home
+            if dataSize is not None:
+                self.size_map[sid] = float(dataSize)
+            if recomputable is not None:
+                self.recompute_map[sid] = bool(recomputable)
+
+        cands = [nid for nid in self.order
+                 if nid in available and nid in self.weight]
+        if not cands:
+            cands = [nid for nid in self.order if nid in self.weight]
+        if not cands:
+            return ""
+
+        now = getattr(self, "now", 0)
+
+        def bid(nid: str):
+            queued = self.vruntime[nid] / self.effective_capacity(nid) / PER_TICK_UNITS
+            calc = self._calc_ticks(nid, cost)
+            data = self._data_ticks(nid, sid)
+            # 融合自 XNU：交互档对跨域 RTT 额外敏感（比批处理档更不肯跨域）。
+            if qos in self.LATENCY_TIERS and sid is not None:
+                home = self.home_map.get(sid)
+                if home and home != nid and not self.recompute_map.get(sid, False):
+                    rtt = self._rtt_ms(self.region.get(home, ""), self.region.get(nid, ""))
+                    data += (self.LATENCY_RTT_WEIGHT - 1.0) * rtt / TICK_MS
+            # 融合自 OH：刚异常过的节点在信任窗口内加价。
+            trust = self._trust_penalty(nid, now)
+            return (queued + calc + data + trust, self.order.index(nid))
+
+        best = min(cands, key=bid)
+        cap = self.effective_capacity(best)
+        self.vruntime[best] += cost / cap
+        self.assigned[best] += 1
+        if sid is not None:
+            self.tier_map[sid] = qos
+        return best
+
+    def snapshot(self) -> Dict[str, Any]:
+        d = super().snapshot()
+        d["geoAware"] = True
+        d["regions"] = sorted(self.regions)
+        d["dataHomeCount"] = len(self.home_map)
+        d["sizeTracked"] = len(self.size_map)
+        return d
+
+
+# ---------------------------------------------------------------------------
 # 3. 统一工厂
 # ---------------------------------------------------------------------------
 
@@ -394,6 +600,8 @@ def make_router(profile: str, cfg: Dict[str, Any]):
         return XnuQosRouter(cfg)
     if profile == "oh-distributed":
         return OhDistributedRouter(cfg)
+    if profile == "geo-distributed":
+        return GeoDistributedRouter(cfg)
     raise ValueError(f"unknown AR8 profile: {profile!r}; "
                      f"choose from {sorted(PROFILES)}")
 

@@ -1,12 +1,12 @@
 # ============================================================
-#  AR8 三版本对照组 —— 云端验证流水线
+#  AR8 四版本对照组 —— 云端验证流水线
 #
 #  两条独立 Job：
 #    1) nix-verify  —— 在 GitHub 免费 x86_64-Linux 虚拟机上装 Nix，
-#                       nix eval（9 个 NixOS 变体完整求值）+
+#                       nix eval（12 个 NixOS 变体完整求值）+
 #                       nix build .#ar8（AR8 包构建 + 安装自检）。
 #       补上「本机无 Nix、宿主关机」空白的真机构建验证。
-#    2) bench-verify —— 纯 Python，实跑三版本基准（31 trials 配对检验）
+#    2) bench-verify —— 纯 Python，实跑四版本基准（31 trials 配对检验）
 #                      + 单测 + 敏感性分析，产物上传 artifact。
 #
 #  触发：ar8-cluster/** 有改动、或本文件改动、或手动 workflow_dispatch。
@@ -46,7 +46,7 @@ jobs:
           mkdir -p ~/.config/nix
           echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
-      # 9 个 NixOS 变体（3 host × 3 profile）完整求值：提前暴露
+      # 12 个 NixOS 变体（3 host × 4 profile）完整求值：提前暴露
       # modules/*.nix 的语法/选项/类型错误。用 toplevel.drvPath 强制全量
       # 求值（惰性求值只查叶子属性会漏错）。
       # 注：ar8-cluster/flake.nix 的 nixpkgs.url 是官方 github:NixOS/nixpkgs/nixos-26.05，
@@ -60,7 +60,12 @@ jobs:
           set -o pipefail
           ok=1
           for c in vm-ar8-node1 vm-ar8-node1-xnu-qos \
-                   vm-ar8-node1-oh-distributed vm-ar8-node2; do
+                   vm-ar8-node1-oh-distributed vm-ar8-node1-geo-distributed \
+                   vm-ar8-node2 vm-ar8-node2-xnu-qos \
+                   vm-ar8-node2-oh-distributed vm-ar8-node2-geo-distributed \
+                   001-thinkpad-x270 001-thinkpad-x270-xnu-qos \
+                   001-thinkpad-x270-oh-distributed \
+                   001-thinkpad-x270-geo-distributed; do
             if ! nix eval --accept-flake-config --raw \
                  ".#nixosConfigurations.${c}.config.system.build.toplevel.drvPath" \
                  2>&1 | tee /tmp/eval.log; then
@@ -73,7 +78,7 @@ jobs:
               break
             fi
           done
-          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 3 profile）"
+          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 4 profile）"
 
       - name: 构建 AR8 包（含 install 自检）
         working-directory: ar8-cluster
@@ -116,7 +121,7 @@ jobs:
       - name: 安装依赖（仅 PyYAML，标准库之外的最小依赖）
         run: pip install pyyaml
 
-      - name: 单测（含加深后的 profile 语义断言 test_53~56）
+      - name: 63 单测（含 geo-distributed 正式 profile 语义断言 test_53~63）
         working-directory: ar8-cluster/ar8-stable
         run: python3 -m unittest discover -s tests -p "test_*.py" -v 2>&1 | tail -40
 

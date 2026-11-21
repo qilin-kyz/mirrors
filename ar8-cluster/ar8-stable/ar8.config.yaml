@@ -29,6 +29,9 @@ nodes:
     class: hot
     memoryMib: 4096
     wan: false
+    # geo-distributed 可选字段：地域 + 出口带宽（MB/s）。缺省退化为单地域。
+    region: site-a
+    bwMbps: 1000
   - id: node2
     ip: 10.23.112.22
     role: worker
@@ -36,6 +39,16 @@ nodes:
     class: warm
     memoryMib: 2048
     wan: false
+    region: site-a
+    bwMbps: 1000
+
+# 地域拓扑：geo-distributed profile 建模「延迟 ≠ 带宽」的唯一真值源。
+# regions 是地域名集合；rttMs 是「地域对 -> 往返延迟(ms)」矩阵（键用 "A|B"）。
+# 无此段（或未给节点声明 region）时，调度退化为同机房单地域，完全向后兼容。
+topology:
+  regions: [site-a]
+  rttMs:
+    "site-a|site-a": 0.05
 
 # 端口只在这一处声明；ar8.nix 防火墙、清单、脚本全部从这里生成
 ports:

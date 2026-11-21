@@ -56,6 +56,11 @@ def _ip_like(v: str) -> bool:
     return len(parts) == 4 and all(p.isdigit() and 0 <= int(p) <= 255 for p in parts)
 
 
+def _is_num(v: Any) -> bool:
+    """非负有限数值（拒绝 bool，bool 是 int 子类）。"""
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0
+
+
 
 FIELD_SPEC = {
     "schemaVersion": (_is_str, "string", lambda v: v == SCHEMA_VERSION),
@@ -128,6 +133,12 @@ def validate_config(cfg: Dict[str, Any]) -> List[str]:
             issues.append(f"node {n.get('id','?')} bad memoryMib")
         if "wan" in n and not _is_bool(n["wan"]):
             issues.append(f"node {n.get('id','?')} bad wan flag")
+        # 地域/带宽为 geo-distributed 可选字段：未声明则退化为同机房，
+        # 但一旦声明必须是合法非负数值，且指向的地域必须在 topology.regions 内。
+        if "region" in n and not _is_str(n["region"]):
+            issues.append(f"node {n.get('id','?')} bad region")
+        if "bwMbps" in n and not _is_num(n["bwMbps"]):
+            issues.append(f"node {n.get('id','?')} bad bwMbps (expect non-negative number)")
     for s in cfg.get("storage", []):
         if not isinstance(s, dict):
             issues.append("storage entry is not a map")
@@ -147,6 +158,44 @@ def validate_config(cfg: Dict[str, Any]) -> List[str]:
                     issues.append(f"FSM transition to unknown state {d}")
         if sm.get("initial") not in states:
             issues.append("FSM initial state not in states")
+
+    # 地域拓扑自洽性：rttMs 的键必须是「已知地域对」，值非负；节点声明的 region
+    # 必须落在 topology.regions 内。无 topology 段时跳过（退化为同机房）。
+    topo = cfg.get("topology")
+    if topo is not None:
+        if not isinstance(topo, dict):
+            issues.append("topology must be a map")
+        else:
+            regions = set(topo.get("regions", []))
+            if not isinstance(topo.get("regions"), list) or not all(_is_str(r) for r in regions):
+                issues.append("topology.regions must be a list of region names")
+            rtt = topo.get("rttMs", {})
+            if not isinstance(rtt, dict):
+                issues.append("topology.rttMs must be a map")
+            else:
+                for k, v in rtt.items():
+                    # 键三种形态都合法：字符串 "a|b"、2 元素 list/tuple（YAML/代码皆可表达）
+                    if isinstance(k, str):
+                        pair = tuple(k.split("|"))
+                        if len(pair) != 2 or not all(pair):
+                            issues.append(f"topology.rttMs key {k!r} must be 'regionA|regionB'")
+                            continue
+                    elif isinstance(k, (list, tuple)):
+                        pair = tuple(k)
+                    else:
+                        issues.append(f"topology.rttMs key {k!r} must be a 'A|B' string or (A, B) pair")
+                        continue
+                    if not _is_num(v):
+                        issues.append(f"topology.rttMs[{k!r}] bad value (expect non-negative number)")
+                    for r in pair:
+                        if regions and r not in regions:
+                            issues.append(f"topology.rttMs references unknown region {r!r}")
+            # 节点 region 必须在声明地域内
+            for n in nodes:
+                if isinstance(n, dict) and "region" in n:
+                    if regions and n["region"] not in regions:
+                        issues.append(f"node {n.get('id','?')} region {n['region']!r} "
+                                      f"not in topology.regions")
     return issues
 
 
@@ -186,8 +235,13 @@ FIELD_WHITELIST = {
                            "nodeCeilingKbit", "allowStandardCompression"},
     "stateMachines.shard": {"initial", "states", "transitions"},
     "stateMachines.node": {"initial", "states", "transitions"},
+    # 地域拓扑：regions 是地域名集合，rttMs 是「地域对 -> 往返延迟(ms)」矩阵。
+    # 供 geo-distributed profile 建模「延迟 ≠ 带宽」；缺省（无 topology 段）退化为
+    # 同机房单地域，向后兼容既有配置。
+    "topology": {"regions", "rttMs"},
 }
-NODE_FIELDS = {"id", "ip", "role", "class", "memoryMib", "wan", "k8sName"}
+NODE_FIELDS = {"id", "ip", "role", "class", "memoryMib", "wan", "k8sName",
+                "region", "bwMbps"}
 STORAGE_FIELDS = {"name", "tier", "kind", "provisioner", "clusterWideMount",
                   "mountableAsBlock"}
 
@@ -485,7 +539,9 @@ class Router:
 
     def pick(self, available: Iterable[str], cost: float,
              sid: Optional[str] = None, tier: Optional[str] = None,
-             home: Optional[str] = None) -> str:
+             home: Optional[str] = None,
+             dataSize: Optional[float] = None,
+             recomputable: Optional[bool] = None) -> str:
         """返回承接该分片的节点；同时推进其 vruntime。
 
         sid/tier/home 是给可插拔调度 profile 用的可选提示（见 ar8-profiles.py）：
@@ -493,6 +549,10 @@ class Router:
         oh-distributed 用 tier/home 做能力协商与数据就近。
         home 是分片数据所在的节点（OpenHarmony 分布式数据管理的「数据本地性」）：
         把任务派到数据所在节点可省去跨节点数据搬运。默认参数保证旧调用方零改动。
+
+        dataSize/recomputable 是 geo-distributed 的传输经济学提示：
+        分片的数据体量(MB)与是否可重算——可重算数据甩到快节点重算，
+        不可重算数据必须搬（瓶颈=源上行 vs 目标下行）。其它 profile 忽略它们。
         """
         cands = [nid for nid in self.order if nid in available and nid in self.capacity]
         if not cands:
@@ -720,7 +780,9 @@ class Ledger:
             s["id"]: dict(id=s["id"], lo=s["lo"], hi=s["hi"], state="queued",
                           uid=None, node=None, result=None, attempts=0,
                           ticks_in_state=0, cost=0.0,
-                          tier=s.get("tier"), home=s.get("home"))
+                          tier=s.get("tier"), home=s.get("home"),
+                          dataSizeMb=s.get("dataSizeMb"),
+                          recomputable=s.get("recomputable"))
             for s in shards
         }
         self.accepted: Dict[int, Dict[str, Any]] = {}
@@ -795,7 +857,9 @@ def reconcile(env: Env, cfg: Dict[str, Any], ledger: Ledger,
                 # 把分片 id 与 QoS 档位透传给 profile 路由器；基线实现忽略它们。
                 # sh['tier'] 可由作业声明，缺省由 profile 的 infer_tier(cost) 推导。
                 node = router.pick(available, cost, sid=sid, tier=sh.get("tier"),
-                           home=sh.get("home"))
+                           home=sh.get("home"),
+                           dataSize=sh.get("dataSizeMb"),
+                           recomputable=sh.get("recomputable"))
                 if not node:
                     continue
                 uid = ledger.next_uid(sid)

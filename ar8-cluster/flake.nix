@@ -60,6 +60,14 @@
             { services.ar8.systemProfile = "oh-distributed"; }
           ];
         };
+        "${hostName}-geo-distributed" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            { nixpkgs.overlays = [ overlay ]; }
+            hostFile
+            { services.ar8.systemProfile = "geo-distributed"; }
+          ];
+        };
       };
     in
     {

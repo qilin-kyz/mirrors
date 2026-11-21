@@ -604,14 +604,9 @@ class TestTripleGapSemantics(unittest.TestCase):
         spec.loader.exec_module(cls.tg)
 
     def _geo(self):
-        nodes, region = self.tg.build_triple_nodes()
-        cfg = {"nodes": nodes}
-        g = self.tg.make_geo_router(cfg)
-        g.region = {n["id"]: n.get("region", "site-a") for n in nodes}
-        g.bw = {n["id"]: self.tg.BW_MBPS.get(n.get("bwTier", "gbe"), 110.0)
-                for n in nodes}
-        g.weight = {n["id"]: float(n.get("_weight", 1.0)) for n in nodes}
-        return g
+        nodes, region, topology = self.tg.build_triple_nodes()
+        cfg = {"nodes": nodes, "topology": topology}
+        return self.tg.make_geo_router(cfg)
 
     def test_57_geo_avoids_cross_region_for_large_irreducible_data(self):
         # 不可重算的大数据（30GB）其 home 在凤凰城（phx），
@@ -649,6 +644,91 @@ class TestTripleGapSemantics(unittest.TestCase):
         # 凤凰城上行是东京的一半 → 搬同样数据代价约 2 倍
         self.assertGreater(bid_phx, bid_tokyo * 1.5,
                            "传输矩阵应能分辨窄链路（凤凰城 1G）与宽链路（东京 2G）的代价差")
+
+
+class TestGeoProfileOfficial(unittest.TestCase):
+    """geo-distributed 作为「正式第四 profile」的融合验证（不再 demo 副本）。
+
+    验证三件事（对应转正的收口）：
+      1. 工厂注册：make_router 能构造，system_params 有独立条目；
+      2. 融合 OH：信任降级必须继承（刚异常节点在窗口内被绕开）；
+      3. 真值源驱动：地域/带宽/RTT 从 config topology 读，而不是散落在脚本常量里。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "ar8_profiles_geo_t", os.path.join(ROOT, "ar8-profiles.py"))
+        cls.ap = importlib.util.module_from_spec(spec)
+        sys.modules["ar8_profiles_geo_t"] = cls.ap
+        spec.loader.exec_module(cls.ap)
+        cls.base_cfg = {
+            "nodes": [
+                {"id": "n1", "class": "hot", "memoryMib": 4096},
+                {"id": "n2", "class": "hot", "memoryMib": 4096},
+            ]
+        }
+
+    def test_60_geo_registers_as_official_profile(self):
+        self.assertIn("geo-distributed", self.ap.PROFILES)
+        self.assertEqual(self.ap.PROFILES["geo-distributed"]["router"],
+                         "ar8-profiles.GeoDistributedRouter")
+        g = self.ap.make_router("geo-distributed", self.base_cfg)
+        self.assertIsInstance(g, self.ap.GeoDistributedRouter)
+        # 系统层参数：数据代价由路由器实时算，不设单值 dataMoveCost
+        sys = self.ap.system_params("geo-distributed")
+        self.assertEqual(sys["dataMoveCost"], 0.0)
+
+    def test_61_geo_inherits_oh_trust_penalty(self):
+        # 融合点①：继承 OH 的节点健康信任降级（假恢复规避）。
+        g = self.ap.make_router("geo-distributed", self.base_cfg)
+        g.set_tick(10)
+        g.note_failure("n1", 10)   # n1 此刻刚异常
+        # 两节点同权同构、无 home、无数据代价，n1 应因信任惩罚被 n2 抢走
+        n = g.pick(["n1", "n2"], 100.0, sid="s0", tier="default")
+        self.assertEqual(n, "n2", "geo 应继承 OH 的信任降级：刚异常节点被绕开")
+
+    def test_62_geo_reads_topology_from_config(self):
+        # 融合点②：地域/带宽/RTT 全从 config 真值源 topology 段读取。
+        cfg = {
+            "nodes": [
+                {"id": "n1", "region": "site-a",  "bwMbps": 1000},
+                {"id": "n2", "region": "us-west", "bwMbps": 120},
+            ],
+            "topology": {
+                "regions": ["site-a", "us-west"],
+                "rttMs": {"site-a|us-west": 160.0},
+            },
+        }
+        g = self.ap.make_router("geo-distributed", cfg)
+        self.assertEqual(g.region["n2"], "us-west")
+        self.assertEqual(g.bw["n2"], 120.0)
+        self.assertEqual(g._rtt_ms("site-a", "us-west"), 160.0)
+        self.assertEqual(g._rtt_ms("us-west", "site-a"), 160.0)
+        # 缺省地域退化：未声明 region 的节点落到 site-a
+        cfg2 = {"nodes": [{"id": "x", "class": "hot", "memoryMib": 2048}],
+                "topology": {"regions": ["site-a"], "rttMs": {"site-a|site-a": 0.05}}}
+        g2 = self.ap.make_router("geo-distributed", cfg2)
+        self.assertEqual(g2.region["x"], "site-a")
+
+    def test_63_geo_pick_signature_passes_data_attributes(self):
+        # 融合点③：reconcile 透传的 dataSize/recomputable 真被 geo 消费——
+        # 不可重算大数据留在 home，可重算小数据甩到强节点（与 test_57/58 同语义，
+        # 但走正式构造 + 显式 dataSize/recomputable 参数，验证透传链路而非手工塞 map）。
+        nodes = [
+            {"id": "strong", "region": "site-a", "bwMbps": 2400, "_weight": 1.0},
+            {"id": "weak",   "region": "site-a", "bwMbps": 110,  "_weight": 0.12},
+        ]
+        g = self.ap.make_router("geo-distributed", {"nodes": nodes})
+        # 不可重算 30GB：数据在 weak（窄上行），留 weak 反而划算
+        pick1 = g.pick(["strong", "weak"], 5000.0, sid="s0", tier="background",
+                       home="weak", dataSize=30000.0, recomputable=False)
+        self.assertEqual(pick1, "weak", "30GB 不可重算且源在窄上行，应留源避免搬运")
+        # 可重算 10MB：数据在 weak，但重算便宜，甩到 strong
+        pick2 = g.pick(["strong", "weak"], 5000.0, sid="s1", tier="default",
+                       home="weak", dataSize=10.0, recomputable=True)
+        self.assertEqual(pick2, "strong", "小数据可重算，应甩到强节点")
 
 
 if __name__ == "__main__":

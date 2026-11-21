@@ -1,11 +1,12 @@
-# AR8 三版本系统 profile —— 同一套硬件，只换调度哲学。
+# AR8 四版本系统 profile —— 同一套硬件，只换调度哲学。
 #
-# 三个版本不是三个内核（XNU/OpenHarmony 塞不进 NixOS，理由见交付说明第 25 章），
-# 而是三套可 nixos-rebuild 切换的系统配置：
+# 四个版本不是四个内核（XNU/OpenHarmony 塞不进 NixOS，理由见交付说明第 25 章），
+# 而是四套可 nixos-rebuild 切换的系统配置：
 #
 #   nixos-baseline   现有配置：两级 slice（batch/control），容量加权 vruntime 路由
 #   xnu-qos          借 XNU QoS class：四级 slice，按任务 QoS 分配权重
 #   oh-distributed   借 OpenHarmony 分布式调度：预留容量 + 软总线 + 确定时延
+#   geo-distributed  传输经济学：BBR + 长肥管道缓冲，配合拓扑感知路由跨地域搬数据
 #
 # 关键：cluster-base.nix 里已有的 ar8-batch / ar8-control 两级 slice 保留不动，
 #       本模块只在对应 profile 下追加/覆盖，避免把基线配置改坏。
@@ -19,13 +20,14 @@ let
   cfg = config.services.ar8;
   isQos = cfg.systemProfile == "xnu-qos";
   isOh  = cfg.systemProfile == "oh-distributed";
+  isGeo = cfg.systemProfile == "geo-distributed";
 in
 {
   options.services.ar8.systemProfile = lib.mkOption {
-    type = lib.types.enum [ "nixos-baseline" "xnu-qos" "oh-distributed" ];
+    type = lib.types.enum [ "nixos-baseline" "xnu-qos" "oh-distributed" "geo-distributed" ];
     default = "nixos-baseline";
     description = ''
-      AR8 系统调度版本。三套配置共用同一份真值源与同一套 FSM，
+      AR8 系统调度版本。四套配置共用同一份真值源与同一套 FSM，
       只替换调度策略（Router）与系统层资源分级（cgroup/sysctl）。
       切换需 nixos-rebuild switch，会重启相关 slice，请安排时间窗。
     '';
@@ -105,6 +107,22 @@ in
         # 确定时延：减少内核抢占点带来的不确定停顿
         "kernel.sched_min_granularity_ns" = 2000000;
         "kernel.sched_wakeup_granularity_ns" = 3000000;
+      })
+      (lib.mkIf isGeo {
+        # 传输经济学（延迟 ≠ 带宽）：跨地域长肥管道要能跑满带宽。
+        #   - BBR 拥塞控制：不同拥塞点/高延迟下比 cubic 更快填满 BDP（带宽-延迟积）；
+        #   - 大缓冲 + 窗口缩放：跨洋 160ms RTT × 1Gbps 需要 ~20MB BDP，默认缓冲装不下。
+        "net.core.default_qdisc" = "fq";
+        "net.ipv4.tcp_congestion_control" = "bbr";
+        "net.core.rmem_max" = 67108864;        # 64MB 接收缓冲，撑住 BDP
+        "net.core.wmem_max" = 67108864;        # 64MB 发送缓冲
+        "net.ipv4.tcp_rmem" = "4096 87380 67108864";
+        "net.ipv4.tcp_wmem" = "4096 65536 67108864";
+        "net.ipv4.tcp_window_scaling" = 1;     # 长肥管道必需
+        # 大块搬移（不可重算数据）对丢包极敏感：启用 SACK + 快速重传，
+        # 减少单包丢失触发的整窗收缩（这对 20GB 跨域搬移是吞吐大敌）。
+        "net.ipv4.tcp_sack" = 1;
+        "net.ipv4.tcp_timestamps" = 1;
       })
     ];
 

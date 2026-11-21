@@ -125,18 +125,30 @@ def _rtt(ra: str, rb: str) -> float:
     return REGION_RTT_MS.get((ra, rb), REGION_RTT_MS.get((rb, ra), 120.0))
 
 
-def build_triple_nodes() -> Tuple[List[Dict[str, Any]], Dict[str, str]]:
+def build_triple_nodes() -> Tuple[List[Dict[str, Any]], Dict[str, str], Dict[str, Any]]:
+    """构造三重差距拓扑，并产出 config 真值源需要的 topology 段。
+
+    geo-distributed 已转正为 ar8-profiles.GeoDistributedRouter，它从 cfg.topology
+    读「地域对 RTT 矩阵」、从 node.region / node.bwMbps 读节点地域与出口带宽。
+    所以这里不再维护一份独立的 demo 路由器，而是把同一份物理事实写成真值源。
+    """
     nodes = []
     region = {}
     for i, (nid, cls, mem_mib, weight, rn, loc, bw) in enumerate(NODE_SPEC):
         nodes.append({
             "id": nid, "ip": f"10.23.112.{21 + i}", "role": "worker",
             "k8sName": f"vm-ar8-{nid}", "class": cls, "memoryMib": mem_mib,
-            "wan": loc == "cloud", "region": rn, "bwTier": bw,
+            "wan": loc == "cloud", "region": rn,
+            "bwMbps": BW_MBPS.get(bw, 110.0),
             "_weight": weight,
         })
         region[nid] = rn
-    return nodes, region
+    regions = sorted(set(region.values()))
+    topology = {
+        "regions": regions,
+        "rttMs": {f"{a}|{b}": v for (a, b), v in REGION_RTT_MS.items()},
+    }
+    return nodes, region, topology
 
 
 # ---------------------------------------------------------------------------
@@ -219,72 +231,12 @@ def make_triple_workload(n: int, seed: int, node_ids: List[str],
 
 
 # ---------------------------------------------------------------------------
-# 4. geo-data 调度器：传输矩阵 + 可重算/不可重算感知
+# 4. geo-data 调度器：正式实现已迁入 ar8-profiles.GeoDistributedRouter
 # ---------------------------------------------------------------------------
-
-class GeoDataRouter(Router):
-    """感知「性能/带宽/地域 + 数据可重算性」的调度器。
-
-    bid = 排队 tick + 计算 tick + 数据 tick（可重算→重算，不可重算→搬移矩阵）。
-    """
-
-    def __init__(self, cfg: Dict[str, Any]):
-        super().__init__(cfg)
-        self.region = {n["id"]: n.get("region", "site-a") for n in cfg.get("nodes", [])}
-        self.bw = {n["id"]: BW_MBPS.get(n.get("bwTier", "gbe"), 110.0)
-                   for n in cfg.get("nodes", [])}
-        self.weight = {n["id"]: float(n.get("_weight", 1.0)) for n in cfg.get("nodes", [])}
-        self.size_map: Dict[str, float] = {}
-        self.home_map: Dict[str, str] = {}
-        self.recompute_map: Dict[str, bool] = {}
-
-    def effective_capacity(self, nid: str) -> float:
-        # 统一用真实机型权重，避免基类 class×mem 推导与 _weight 打架
-        return max(self.weight.get(nid, 0.5), 1e-6)
-
-    def _calc_ticks(self, nid: str, cost_units: float) -> float:
-        return cost_units / (max(self.weight.get(nid, 0.5), 1e-6) * PER_TICK_UNITS)
-
-    def _data_ticks(self, nid: str, sid: str | None) -> float:
-        if sid is None:
-            return 0.0
-        home = self.home_map.get(sid)
-        if home is None or home == nid:
-            return 0.0
-        size = self.size_map.get(sid, 0.0)
-        w = max(self.weight.get(nid, 0.5), 1e-6)
-        if self.recompute_map.get(sid, False):
-            return size * RECOMPUTE_UNITS_PER_MB / (w * PER_TICK_UNITS)
-        bw = min(self.bw.get(home, 110.0), self.bw.get(nid, 110.0))
-        return transfer_cost_ms(self.region.get(home, ""), self.region.get(nid, ""),
-                                size, bw) / TICK_MS
-
-    def bid(self, nid: str, cost_units: float, sid: str | None) -> float:
-        queued_t = self.vruntime[nid] / max(self.effective_capacity(nid), 1e-9) / PER_TICK_UNITS
-        return queued_t + self._calc_ticks(nid, cost_units) + self._data_ticks(nid, sid)
-
-    def pick(self, available, cost, sid=None, tier=None, home=None):
-        if sid is not None and home:
-            self.home_map[sid] = home
-        cands = [nid for nid in self.order if nid in available and nid in self.capacity]
-        if not cands:
-            cands = [nid for nid in self.order if nid in self.capacity]
-        if not cands:
-            return ""
-        best = min(cands, key=lambda nid: (self.bid(nid, cost, sid), self.order.index(nid)))
-        cap = max(self.effective_capacity(best), 1e-9)
-        self.vruntime[best] += cost / cap
-        self.assigned[best] += 1
-        return best
-
-    def snapshot(self):
-        d = super().snapshot()
-        d["geoAware"] = True
-        return d
-
-
-def make_geo_router(cfg: Dict[str, Any]) -> GeoDataRouter:
-    return GeoDataRouter(cfg)
+# 融合点：demo 版 GeoDataRouter 已转正，不再在本文件重复维护。geo 的物理事实
+# （RTT 矩阵 / 节点带宽）改由 config 真值源 topology 段承载，路由器从真值源读。
+def make_geo_router(cfg: Dict[str, Any]):
+    return ap.make_router("geo-distributed", cfg)
 
 
 # ---------------------------------------------------------------------------
@@ -374,7 +326,7 @@ def run_triple(router_name: str, shards, tiers, cfg, seed, max_ticks=60000):
     ledger_shards = [dict(s, tier=tiers.get(s["id"])) for s in shards]
 
     region_map = {n["id"]: n.get("region", "site-a") for n in cfg["nodes"]}
-    bw_map = {n["id"]: BW_MBPS.get(n.get("bwTier", "gbe"), 110.0) for n in cfg["nodes"]}
+    bw_map = {n["id"]: float(n.get("bwMbps", 110.0)) for n in cfg["nodes"]}
     weight_map = {n["id"]: float(n.get("_weight", 1.0)) for n in cfg["nodes"]}
     size_map = {s["id"]: s.get("dataSizeMb", 0.0) for s in shards}
     home_map = {s["id"]: s.get("home") for s in shards}
@@ -388,15 +340,16 @@ def run_triple(router_name: str, shards, tiers, cfg, seed, max_ticks=60000):
     elif router_name == "oh":
         router = ap.make_router("oh-distributed", cfg)
     elif router_name == "geo":
+        # 正式实现：数据属性经 reconcile 透传（Ledger 保留 dataSizeMb/recomputable，
+        # reconcile -> router.pick(dataSize=, recomputable=)），无需再手动塞 map。
         router = make_geo_router(cfg)
-        router.size_map = size_map
-        router.recompute_map = recompute_map
     else:
         raise ValueError(router_name)
 
     system = ap.system_params(
         "xnu-qos" if router_name == "xnu"
-        else "oh-distributed" if router_name in ("oh", "geo")
+        else "geo-distributed" if router_name == "geo"
+        else "oh-distributed" if router_name == "oh"
         else "nixos-baseline")
     if router_name != "xnu":
         system["qosSpeed"] = {}
@@ -435,9 +388,10 @@ def main():
     pa.add_argument("--json", default="")
     args = pa.parse_args()
 
-    nodes, region = build_triple_nodes()
+    nodes, region, topology = build_triple_nodes()
     cfg = yaml.safe_load(open(os.path.join(HERE, "ar8.config.yaml"), encoding="utf-8"))
     cfg["nodes"] = nodes
+    cfg["topology"] = topology
     node_ids = [n["id"] for n in nodes]
     tiers_mix = {"interactive": 0.2, "default": 0.3, "utility": 0.3, "background": 0.2}
 
