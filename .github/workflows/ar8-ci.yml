@@ -172,13 +172,21 @@ jobs:
           fi
           echo "=== ISO 产物 ==="
           ls -la result/iso/
+          # result 是符号链接，upload-artifact@v4 默认不跟随符号链接，直接传
+          # result/iso/*.iso 会 "No files were found"。这里 find -L 跟随链接，
+          # 把真实 ISO 复制到工作区的普通目录，上传步骤从该目录取件。
+          mkdir -p "$GITHUB_WORKSPACE/ar8-iso-out"
+          find -L result/ -name '*.iso' -type f -exec cp {} "$GITHUB_WORKSPACE/ar8-iso-out/" \;
+          echo "=== 待上传 ISO（解引用后）==="
+          ls -lh "$GITHUB_WORKSPACE/ar8-iso-out/"
 
       - name: 上传 AR8 1.0 出厂 ISO
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ar8-1.0-installer-iso
-          path: result/iso/*.iso
+          path: ar8-iso-out/*.iso
+          if-no-files-found: error   # ISO 没产出就显式失败，不再静默漏传
           compression-level: 0   # ISO 已压缩，不再二次压缩
 
   # ------------------------------------------------------------------
