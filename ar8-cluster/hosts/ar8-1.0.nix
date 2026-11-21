@@ -22,7 +22,9 @@
 {
   imports = [ ../modules/cluster-base.nix ];
 
-  networking.hostName = "ar8-1.0";
+  # hostname 不能含点（NixOS 正则 ^[[:alnum:]]([[:alnum:]_-]{0,61}[[:alnum:]])?$），
+  # 用连字符；1.0 品牌名保留在 ISO volumeID / flake attrpath / 文档里。
+  networking.hostName = "ar8-1-0";
 
   # ---- 出厂版本标识（融合后的正式版本）----
   services.ar8.systemProfile = "geo-distributed";
