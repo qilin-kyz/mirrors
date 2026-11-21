@@ -94,7 +94,7 @@ stdenv.mkDerivation {
     # --- 核心 Python（必须平铺：ar8ctl 用 __file__ 同目录加载 ar8-bandwidth.py）---
     for f in ar8core.py ar8ctl.py ar8-bandwidth.py ar8-capacity.py capability.py \
              ar8-profiles.py bench-profiles.py bench-stats.py bench-sensitivity.py \
-             bench-router-throughput.py; do
+             bench-router-throughput.py bench-triple-gap.py; do
       install -m 0644 "$src/$f" "$out_py/$f"
     done
 
@@ -184,6 +184,12 @@ stdenv.mkDerivation {
     makeWrapper "${pythonEnv}/bin/python3" \
       "$out_bin/ar8-router-throughput" \
       --add-flags "$out_py/bench-router-throughput.py" \
+      --prefix PATH : "${lib.makeBinPath [ bash coreutils ]}"
+
+    # 三重差距基准入口：性能/带宽/地域极大差异下的调度对照
+    makeWrapper "${pythonEnv}/bin/python3" \
+      "$out_bin/ar8-triple-gap" \
+      --add-flags "$out_py/bench-triple-gap.py" \
       --prefix PATH : "${lib.makeBinPath [ bash coreutils ]}"
 
 

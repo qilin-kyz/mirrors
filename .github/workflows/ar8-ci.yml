@@ -146,6 +146,12 @@ jobs:
             --iters 5 --shards 48 --trials 50 --sweep-nodes 8 \
             --json bench-router-throughput.json
 
+      - name: 三重差距基准（性能/带宽/地域，四方对照 + geo 矩阵重算）
+        working-directory: ar8-cluster/ar8-stable
+        run: |
+          python3 bench-triple-gap.py --shards 48 --trials 31 --seed 20261120 \
+            --json bench-triple-gap.json
+
       - name: 上传基准产物
         if: always()
         uses: actions/upload-artifact@v4
@@ -157,3 +163,4 @@ jobs:
             ar8-cluster/ar8-stable/bench-failure-dl.json
             ar8-cluster/ar8-stable/bench-sensitivity-homo.json
             ar8-cluster/ar8-stable/bench-router-throughput.json
+            ar8-cluster/ar8-stable/bench-triple-gap.json

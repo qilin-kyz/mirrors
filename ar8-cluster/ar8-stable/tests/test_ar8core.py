@@ -587,5 +587,69 @@ class TestProfileSemantics(unittest.TestCase):
         self.assertEqual(n, "node2", "刚异常节点应被信任降级绕开")
 
 
+class TestTripleGapSemantics(unittest.TestCase):
+    """geo（矩阵 + 重算经济学）调度器的核心语义，防装饰性。
+
+    场景：三重差距（性能/带宽/地域）下，「不可重算大数据的落点」必须被
+    传输代价主导，而不是算力主导 —— 这正是 xnu 会翻车、geo 能赢的根因。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "bench_triple_gap_t", os.path.join(ROOT, "bench-triple-gap.py"))
+        cls.tg = importlib.util.module_from_spec(spec)
+        sys.modules["bench_triple_gap_t"] = cls.tg
+        spec.loader.exec_module(cls.tg)
+
+    def _geo(self):
+        nodes, region = self.tg.build_triple_nodes()
+        cfg = {"nodes": nodes}
+        g = self.tg.make_geo_router(cfg)
+        g.region = {n["id"]: n.get("region", "site-a") for n in nodes}
+        g.bw = {n["id"]: self.tg.BW_MBPS.get(n.get("bwTier", "gbe"), 110.0)
+                for n in nodes}
+        g.weight = {n["id"]: float(n.get("_weight", 1.0)) for n in nodes}
+        return g
+
+    def test_57_geo_avoids_cross_region_for_large_irreducible_data(self):
+        # 不可重算的大数据（30GB）其 home 在凤凰城（phx），
+        # 凤凰城虽然算力不错（0.5）但搬到别处要付 ~200ms 延迟 + 窄上行。
+        # 正确决策：把任务留在 home（phx），而不是甩给算力更高的 core1。
+        g = self._geo()
+        g.home_map["s0"] = "phx"
+        g.size_map["s0"] = 30000.0
+        g.recompute_map["s0"] = False
+        n = g.pick([nid for nid in g.order], 5000.0, sid="s0", tier="background",
+                   home="phx")
+        self.assertEqual(n, "phx", "30GB 不可重算数据应留在数据源（搬运代价碾压算力差）")
+
+    def test_58_geo_recomputes_small_data_on_fast_node(self):
+        # 可重算的小数据（10MB）其 home 在弱机 edge2（3 代 i5，0.12），
+        # 但重算成本远小于「从弱机窄上行搬过来」，正确决策是甩到强机 core1。
+        g = self._geo()
+        g.home_map["s1"] = "edge2"
+        g.size_map["s1"] = 10.0
+        g.recompute_map["s1"] = True
+        n = g.pick([nid for nid in g.order], 5000.0, sid="s1", tier="default",
+                   home="edge2")
+        self.assertEqual(n, "core1", "小数据可重算，应甩到最强节点（算力引力主导）")
+
+    def test_59_geo_transfer_matrix_distinguishes_link_quality(self):
+        # geo 的传输矩阵能分辨「两条不同质量的链路」（单值 dataMoveCost 做不到）：
+        # 同一份 20GB 不可重算数据（home=core1），搬到东京（2G 云链路）应比搬到
+        # 凤凰城（1G 云链路）便宜约一半 —— 因为瓶颈带宽 = min(源上行, 目标下行)。
+        g = self._geo()
+        g.home_map["s2"] = "core1"   # 数据在 site-a 核心（上行 2400MB/s）
+        g.size_map["s2"] = 20000.0   # 20GB 不可重算
+        g.recompute_map["s2"] = False
+        bid_tokyo = g._data_ticks("tokyo", "s2")   # wan-2g，瓶颈 240MB/s
+        bid_phx = g._data_ticks("phx", "s2")       # wan-1g，瓶颈 120MB/s
+        # 凤凰城上行是东京的一半 → 搬同样数据代价约 2 倍
+        self.assertGreater(bid_phx, bid_tokyo * 1.5,
+                           "传输矩阵应能分辨窄链路（凤凰城 1G）与宽链路（东京 2G）的代价差")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
