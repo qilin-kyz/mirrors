@@ -106,6 +106,29 @@ in
       };
     };
 
+    # 九、节点上报（唯一标识 + 心跳）。对应「机器开机后固定向公网机发信息，
+    # 并被公网机接收」。node-id 在上报脚本里生成并固化，本模块只负责：
+    #   1) 把上报地址写进 /etc/ar8/report.conf（可改，改完 nixos-rebuild 生效）；
+    #   2) 把 profile / k3s 角色写进 /etc/ar8/ 供上报脚本读取；
+    #   3) 开机跑一次 + systemd timer 周期兜底上报。
+    report = {
+      enable = lib.mkEnableOption "开机自动向公网/控制台节点上报心跳（含唯一 node-id）";
+      url = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+        description = ''
+          上报端点，如 http://182.92.237.205/report（走标准 TCP 80）。
+          空则回落到 ar8-report.sh 内置默认值（同样指向公网 collector）。
+          后期改公网机 IP 只改这里的 url 一个字段即可。
+        '';
+      };
+      interval = lib.mkOption {
+        type = lib.types.str;
+        default = "*:0/1";
+        description = "systemd timer OnCalendar 表达式（默认每分钟）";
+      };
+    };
+
     # 一、资源池化与异构算力调度（占位，后端分阶段接入）
     scheduler = {
       enable = lib.mkEnableOption "异构算力调度（QSV / GPU / 云端 spot）";
@@ -309,6 +332,24 @@ in
           mode = "0444";
         };
       })
+      # 节点上报：写上报地址 + 本机画像（profile / k3s 角色），供 ar8-report 读取。
+      # report.conf 是「唯一标识上报」的地址真值源，改这里一个字段就能改公网机地址。
+      (lib.mkIf cfg.report.enable {
+        "ar8/report.conf" = {
+          text =
+            (if cfg.report.url != ""
+             then "REPORT_URL=${cfg.report.url}\n"
+             else "# REPORT_URL 未在此配置，ar8-report 使用内置默认（公网 collector）\n");
+          mode = "0644";
+        };
+        "ar8/profile" = { text = "${cfg.systemProfile}\n"; mode = "0644"; };
+        "ar8/k3s-role" = { text = "${cfg.workload.kubernetes.role}\n"; mode = "0644"; };
+      })
+      # 版本标识：出厂系统自证版本（ar8ctl --version 走包的 version，这里落到
+      # /etc/ar8/version 供运维/脚本免执行直接读）。version 取包的 derivation.version。
+      {
+        "ar8/version" = { text = "${cfg.package.version}\n"; mode = "0444"; };
+      }
     ];
 
     # 可写状态目录 + workload 清单软链（合并为一处，避免重复定义同一选项）
@@ -422,6 +463,41 @@ in
         k3s kubectl apply -f "$D/ar8-eaglercraft.yaml" || true
         k3s kubectl -n ar8-eagler rollout status statefulset/ar8-eagler --timeout=300s || true
       '';
+    };
+
+    # ---- 节点上报：唯一标识 + 心跳（固定向公网机发信息，后期可改地址）----
+    # 幂等：node-id 在脚本里首次生成并固化到 /etc/ar8/node-id；service+timer
+    # 重复触发只更新心跳，绝不重生成 ID。report 自适配 server/agent 双角色。
+    systemd.services.ar8-report = lib.mkIf cfg.report.enable {
+      description = "AR8 节点心跳上报（唯一 node-id + 状态快照）";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      path = [ pkgs.bash pkgs.coreutils pkgs.iproute2 cfg.package ];
+      environment = {
+        AR8_PROFILE = cfg.systemProfile;
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        # node-id 固化到 /etc/ar8，last-report 到 /var/lib/ar8 —— 分属两处，
+        # StateDirectory 只建 /var/lib/ar8；/etc/ar8 由上面 environment.etc 兜住。
+      } // lib.optionalAttrs (stateDirName != null) {
+        StateDirectory = stateDirName;
+        StateDirectoryMode = "0750";
+      };
+      script = ''
+        exec ar8-report
+      '';
+    };
+
+    systemd.timers.ar8-report = lib.mkIf cfg.report.enable {
+      description = "AR8 节点心跳周期上报定时器";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "30s";
+        OnCalendar = cfg.report.interval;
+        Persistent = true;
+        Unit = "ar8-report.service";
+      };
     };
   };
 }

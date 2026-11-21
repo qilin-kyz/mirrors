@@ -64,7 +64,7 @@ jobs:
                    001-thinkpad-x270 001-thinkpad-x270-xnu-qos \
                    001-thinkpad-x270-oh-distributed \
                    001-thinkpad-x270-geo-distributed \
-                   ar8-geo-standalone; do
+                   ar8-geo-standalone ar8-1.0; do
             if ! nix eval --accept-flake-config --raw \
                  ".#nixosConfigurations.${c}.config.system.build.toplevel.drvPath" \
                  2>&1 | tee /tmp/eval.log; then
@@ -77,7 +77,7 @@ jobs:
               break
             fi
           done
-          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 4 profile + geo 独立整机）"
+          [ "$ok" = "1" ] && echo "变体完整求值通过（3 host × 4 profile + geo 独立整机 + 1.0 出厂整机）"
 
       - name: 构建 AR8 包（含 install 自检）
         working-directory: ar8-cluster
@@ -109,7 +109,7 @@ jobs:
           path: /tmp/build.log
 
   # ------------------------------------------------------------------
-  # Job 2：第四方案落地 —— geo-distributed 系统闭包 + 可引导安装 ISO
+  # Job 2：AR8 1.0 出厂 —— 融合版系统闭包 + 出厂安装 ISO
   # ------------------------------------------------------------------
   geo-sys:
     runs-on: ubuntu-latest
@@ -126,57 +126,58 @@ jobs:
           mkdir -p ~/.config/nix
           echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
-      # 第四方案落地（方案A）：真实构建 geo-distributed 系统闭包。
-      # 不只是 eval —— 跑出完整的 /nix/store/...-nixos-system，证明
-      # 「能把 geo-distributed 打包成系统」不是纸面声明。构建后取证 systemProfile。
-      - name: 构建 geo-distributed 独立整机系统闭包（toplevel）
+      # AR8 1.0 出厂（融合基础系统 × AR8）：真实构建 1.0 系统闭包。
+      # 不只 eval —— 跑出完整 /nix/store/...-nixos-system，取证版本标识与 profile。
+      - name: 构建 AR8 1.0 融合版系统闭包（toplevel）
         working-directory: ar8-cluster
         run: |
           set -o pipefail
-          if ! nix build .#nixosConfigurations.ar8-geo-standalone.config.system.build.toplevel \
-               --accept-flake-config --print-out-paths 2>&1 | tee /tmp/geo-build.log; then
-            MSG=$(tail -40 /tmp/geo-build.log | head -c 1800)
+          if ! nix build .#nixosConfigurations.ar8-1.0.config.system.build.toplevel \
+               --accept-flake-config --print-out-paths 2>&1 | tee /tmp/ar810-build.log; then
+            MSG=$(tail -40 /tmp/ar810-build.log | head -c 1800)
             MSG="${MSG//'%'/'%25'}"
             MSG="${MSG//$'\n'/'%0A'}"
             MSG="${MSG//$'\r'/'%0D'}"
-            echo "::error::geo-distributed 系统闭包构建失败:${MSG}"
+            echo "::error::AR8 1.0 系统闭包构建失败:${MSG}"
             exit 1
           fi
-          echo "=== geo-distributed 系统闭包 ==="
+          echo "=== AR8 1.0 系统闭包 ==="
           nix eval --accept-flake-config --raw \
-            ".#nixosConfigurations.ar8-geo-standalone.config.services.ar8.systemProfile"
-          echo "(期望输出 geo-distributed)"
+            ".#nixosConfigurations.ar8-1.0.config.services.ar8.systemProfile"
+          echo "(期望 geo-distributed)"
+          nix eval --accept-flake-config --raw \
+            ".#ar8.version"
+          echo "(期望 1.0)"
 
-      - name: 上传 geo-distributed 系统闭包构建日志
+      - name: 上传 AR8 1.0 系统闭包构建日志
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ar8-geo-system-closure-log
-          path: /tmp/geo-build.log
+          name: ar8-1.0-system-closure-log
+          path: /tmp/ar810-build.log
 
-      # 第四方案落地（方案B）：从零构建 geo-distributed 可引导安装 ISO。
-      # 一张盘刻录/挂载后跑 ar8-geo-install 或 nixos-install --flake #ar8-geo-standalone，
-      # 装出来的就是 geo-distributed 系统。产物 ISO 上传 + 发 Release 供下载。
-      - name: 构建 geo-distributed 安装 ISO
+      # AR8 1.0 出厂安装 ISO：一张盘装出 1.0 系统，flake 源码随盘离线可装。
+      # 盘内入口 ar8-install /dev/<磁盘>，或 nixos-install --flake <path>#ar8-1.0。
+      - name: 构建 AR8 1.0 出厂安装 ISO
         working-directory: ar8-cluster
         run: |
           set -o pipefail
-          if ! nix build .#iso --accept-flake-config 2>&1 | tee /tmp/geo-iso.log; then
-            MSG=$(tail -40 /tmp/geo-iso.log | head -c 1800)
+          if ! nix build .#iso --accept-flake-config 2>&1 | tee /tmp/ar810-iso.log; then
+            MSG=$(tail -40 /tmp/ar810-iso.log | head -c 1800)
             MSG="${MSG//'%'/'%25'}"
             MSG="${MSG//$'\n'/'%0A'}"
             MSG="${MSG//$'\r'/'%0D'}"
-            echo "::error::geo-distributed ISO 构建失败:${MSG}"
+            echo "::error::AR8 1.0 ISO 构建失败:${MSG}"
             exit 1
           fi
           echo "=== ISO 产物 ==="
           ls -la result/iso/
 
-      - name: 上传 geo-distributed ISO
+      - name: 上传 AR8 1.0 出厂 ISO
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ar8-geo-installer-iso
+          name: ar8-1.0-installer-iso
           path: result/iso/*.iso
           compression-level: 0   # ISO 已压缩，不再二次压缩
 

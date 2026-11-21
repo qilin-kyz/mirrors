@@ -19,7 +19,7 @@
 , bash
 , coreutils
 , makeWrapper
-, version ? "0-unstable-2026-11-20"
+, version ? "1.0"
 }:
 
 # Python 运行时只含「标准库 + PyYAML」。必须用 let 绑定而不是写成 derivation 的
@@ -113,6 +113,7 @@ stdenv.mkDerivation {
     # --- 测试与工具脚本 ---
     install -m 0644 "$src/regression.sh" "$out_py/regression.sh"
     install -m 0755 "$src/enroll.sh" "$out_bin/ar8-enroll"
+    install -m 0755 "$src/ar8-report.sh" "$out_bin/ar8-report"
 
     # --- MC 相关（验收夹具；不作为核心依赖）---
     # 注意：不能写 `[ -f x ] && install ...`。stdenv 的 set -e 会让「文件不存在时

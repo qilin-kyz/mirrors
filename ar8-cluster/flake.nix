@@ -82,7 +82,9 @@
           ar8 = p.ar8;
           default = p.ar8;
         } // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
-          iso = self.nixosConfigurations.ar8-geo-installer.config.system.build.isoImage;
+          # 出厂 ISO：默认产出 AR8 1.0 融合版；geo 版仍可用
+          #   nix build .#nixosConfigurations.ar8-geo-installer.config.system.build.isoImage
+          iso = self.nixosConfigurations.ar8-1.0-installer.config.system.build.isoImage;
         });
 
       # ---- overlay：让 nixpkgs 里出现 pkgs.ar8 ----
@@ -111,6 +113,26 @@
               { nixpkgs.overlays = [ overlay ]; }
               "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-base.nix"
               ./hosts/ar8-geo-installer.nix
+            ];
+          };
+          # ---- AR8 1.0 出厂整机：基础系统 × AR8 融合版（默认 geo-distributed）----
+          # 出厂即控制面 + 异构硬件宽口径 + 唯一标识上报 + 版本标识 1.0。
+          ar8-1.0 = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              { nixpkgs.overlays = [ overlay ]; }
+              ./hosts/ar8-1.0.nix
+            ];
+          };
+          # ---- AR8 1.0 出厂安装 ISO：一张盘装出 1.0 系统，flake 随盘离线可装 ----
+          # 盘内入口 ar8-install /dev/<磁盘>，或 nixos-install --flake <path>#ar8-1.0
+          ar8-1.0-installer = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = { inherit self; };   # flake 源码随盘（storeContents）
+            modules = [
+              { nixpkgs.overlays = [ overlay ]; }
+              "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-base.nix"
+              ./hosts/ar8-1.0-installer.nix
             ];
           };
         };

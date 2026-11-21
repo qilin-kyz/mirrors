@@ -66,4 +66,13 @@
       "https://docker.1panel.live"
     ];
   };
+
+  # ---- 节点上报：唯一标识 + 心跳（固定向公网机发信息，被公网机接收）----
+  # node-id 由 ar8-report 开机首次生成并固化到 /etc/ar8/node-id（machine-id 派生，
+  # 从未重生成）；心跳经 systemd timer 周期发送到 report.url。
+  # 后期换公网机只改 services.ar8.report.url 一个字段即可，其余不动。
+  services.ar8.report = {
+    enable = true;
+    url = "http://182.92.237.205/report";   # 公网 collector（标准 80，可改）
+  };
 }
