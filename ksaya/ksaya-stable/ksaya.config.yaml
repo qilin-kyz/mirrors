@@ -1,0 +1,162 @@
+# KSAYA 稳定核心 —— 唯一真值源
+# 所有清单、端口、端口放行、作业参数、准入规则、任务名都由本文件派生。
+# 禁止在 YAML 里内嵌业务脚本，禁止用 kubectl set env / sed 改运行时行为。
+# 修改流程：改本文件 -> ksayactl validate -> ksayactl plan -> ksayactl apply（事务化，可回滚）
+schemaVersion: ksaya/v1
+generation: 1
+
+cluster:
+  name: ksaya
+  namespace: ksaya-core
+  # 2026-11-18 重建后：control-plane 已从旧 pilot(10.23.112.16) 迁到 node1。
+  # 旧 pilot VM 已不可达；ECS 隧道未建立，ecs 节点暂移出集群声明。
+  # 将来接回某个具体云资源时，为它单独写接入代码并在此登记，不做通用兼容层。
+  pilot: 10.23.112.21
+  jump: qilin@192.168.1.72
+  sshUser: root
+  kubectl: k3s kubectl
+  ecsPublicIp: 182.92.237.205
+  ecsTunnelIp: 10.0.0.1
+  wanBwCeilingKbit: 8
+
+nodes:
+  - id: node1
+    ip: 10.23.112.21
+    role: control-plane
+    # 集群里注册的真实节点名。路由决策在配置里用短 id，落成 k8s nodeSelector
+    # 时必须用这个名字，否则 Pod 会永远 Pending。
+    k8sName: vm-ksaya-node1
+    class: hot
+    memoryMib: 4096
+    wan: false
+    # geo-distributed 可选字段：地域 + 出口带宽（MB/s）。缺省退化为单地域。
+    region: site-a
+    bwMbps: 1000
+  - id: node2
+    ip: 10.23.112.22
+    role: worker
+    k8sName: vm-ksaya-node2
+    class: warm
+    memoryMib: 2048
+    wan: false
+    region: site-a
+    bwMbps: 1000
+
+# 地域拓扑：geo-distributed profile 建模「延迟 ≠ 带宽」的唯一真值源。
+# regions 是地域名集合；rttMs 是「地域对 -> 往返延迟(ms)」矩阵（键用 "A|B"）。
+# 无此段（或未给节点声明 region）时，调度退化为同机房单地域，完全向后兼容。
+topology:
+  regions: [site-a]
+  rttMs:
+    "site-a|site-a": 0.05
+
+# 端口只在这一处声明；ksaya.nix 防火墙、清单、脚本全部从这里生成
+ports:
+  api: 6443
+  legacyBroker: 8080
+  s3: 9000
+  jobBroker: 9100
+  kubelet: 10250
+  etcd: 2379
+  ssh: 22
+
+features:
+  admission:
+    enabled: true
+    # 对象存储 / 冷归档 / 云盘 禁止以整集群块挂载方式使用（结构性禁令，不是运行时脚本）
+    forbidClusterWideMount: true
+    forbidObjectAsBlockVolume: true
+    allowObjectViaGatewayReadOnly: true
+  job:
+    enabled: true
+    image: busybox:1.37
+    imagePullPolicy: IfNotPresent
+    chunk: 2000
+    defaultN: 40000
+    ttlSeconds: 18
+    activeDeadlineSeconds: 120
+    backoffLimit: 3
+    ttlSecondsAfterFinished: 600
+    spreadPolicy: ScheduleAnyway
+  s3:
+    enabled: true
+    # 单实例最简 S3（MinIO）。不做多厂商通用兼容层：
+    # 将来接某个具体云资源时，为那个资源单独写接入代码，不做通用适配。
+    endpoint: http://ksaya-s3.ksaya-s3.svc.cluster.local:9000
+    buckets: ["ksaya-jobs", "ksaya-artifacts"]
+
+  bandwidth:
+    # 系统层带宽限制（tc/netem）。取代原先的「语义压缩」思路：
+    # 不再在应用层想办法压小流量，而是由调度侧直接给任务分配带宽额度，
+    # 并对高流量/低价值任务强制降速，从源头控制网络占用。
+    enabled: true
+    # 任务分级 -> 带宽上限（kbit/s）。0 表示不限速。
+    tiers:
+      bulk:      { limitKbit: 1024, latencyMs: 40,  lossPct: 0.0 }
+      streaming: { limitKbit: 4096, latencyMs: 10,  lossPct: 0.0 }
+      interactive: { limitKbit: 16384, latencyMs: 2, lossPct: 0.0 }
+      realtime:  { limitKbit: 0,    latencyMs: 0,  lossPct: 0.0 }
+    # 作业默认档位；调度时按作业声明的 tier 查表
+    defaultTier: bulk
+    # 节点级总上限，防止单节点被单个作业打满（0 = 不限）
+    nodeCeilingKbit: 8192
+    # 应用层协议层仍允许 zlib 等标准压缩（这是标准库能力，不是自研语义层）
+    allowStandardCompression: true
+
+# 四档速率存储模型；只做声明与准入，不启动真实 CSI 驱动、不创建计费资源
+storage:
+  - name: ksayac-local-nvme
+    tier: hot
+    kind: block
+    provisioner: rancher.io/local-path
+    clusterWideMount: forbidden
+  - name: ksayac-cloud-essd
+    tier: warm
+    kind: block
+    provisioner: diskplugin.csi.alibabacloud.com
+    clusterWideMount: forbidden
+  - name: ksayac-cloud-oss
+    tier: cool
+    kind: object
+    provisioner: ossplugin.csi.alibabacloud.com
+    clusterWideMount: forbidden
+    mountableAsBlock: false
+  - name: ksayac-cloud-archive
+    tier: cold
+    kind: object
+    provisioner: csi.ksaya.cloud-archive
+    clusterWideMount: forbidden
+    mountableAsBlock: false
+
+# 作业状态机（显式声明，非法转换一律拒绝；模拟器与真实集群共用同一份定义）
+stateMachines:
+  shard:
+    initial: queued
+    states: [queued, leased, submitted, accepted, rejected, expired, harvested]
+    transitions:
+      queued: [leased, expired]
+      leased: [submitted, expired]
+      submitted: [accepted, rejected]
+      accepted: [harvested]
+      rejected: [queued]
+      # expired -> submitted: Manager.pm:1611 的 no-LRM-result-lost 原则：
+      # 超时后旧的 uid 结果可能在下一轮才到达，换 uid 前必须先消费它
+      expired: [queued, submitted]
+      harvested: []
+  node:
+    initial: ready
+    states: [ready, suspect, lost, ready_again]
+    transitions:
+      ready: [suspect]
+      suspect: [ready, lost]
+      lost: [ready_again]
+      ready_again: [ready]
+
+invariants:
+  # 任何一次 reconcile 之后都必须成立；violation 即判失败，不靠人工看日志
+  - noShardLost
+  - noDuplicateAcceptedResult
+  - noStaleGenerationAccepted
+  - allAcceptedSumMatchesReference
+  - noSilentStall
+  - nodesConvergeWithinTicks

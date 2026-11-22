@@ -1,0 +1,112 @@
+# KSAYA Eaglercraft —— 浏览器直接玩的 Minecraft（集群 workload）
+#
+# 组成：Paper 1.12.2 + EaglerXServer（WebSocket 协议翻译）+ Via 三件套
+#       + EaglercraftX 1.8.8 离线客户端 HTML（同容器 busybox httpd 静态服务）
+#
+# 版本铁律：EaglerXServer 要 Java 17；Paper 必须 1.12.2；
+#           1.8.8 客户端(协议47) ↔ 1.12.2(协议340) 靠 ViaVersion/Backwards/Rewind。
+#
+# 镜像：ksaya.local/eaglercraft:1.12.2（本地构建，见 mc/build-eagler-image.sh）
+# 节点：钉 vm-ksaya-node2（node1 内存已被 k3s server + MC26.3 + MinIO 占满）
+# 端口：25565 游戏(WS) → NodePort 30112；8080 客户端网页 → NodePort 30113
+# 玩法：浏览器开 http://<node-ip>:30113 → Multiplayer → Direct Connect
+#       → 填 ws://<node-ip>:30112
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ksaya-eagler
+  labels:
+    ksaya.io/workload: "eaglercraft"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ksaya-eagler-data
+  namespace: ksaya-eagler
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ksaya-eagler
+  namespace: ksaya-eagler
+  labels:
+    app: ksaya-eagler
+    ksaya.io/workload: "eaglercraft"
+spec:
+  serviceName: ksaya-eagler
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ksaya-eagler
+  template:
+    metadata:
+      labels:
+        app: ksaya-eagler
+        ksaya.io/workload: "eaglercraft"
+      annotations:
+        ksaya.io/bandwidth-tier: "streaming"
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: vm-ksaya-node2
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: eaglercraft
+          image: ksaya.local/eaglercraft:1.12.2
+          imagePullPolicy: Never
+          command: ["/opt/eagler/start.sh"]
+          ports:
+            - name: game
+              containerPort: 25565
+            - name: web
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "384Mi"
+            limits:
+              cpu: "2"
+              memory: "900Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 25565
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            failureThreshold: 9
+          livenessProbe:
+            tcpSocket:
+              port: 25565
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            failureThreshold: 6
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ksaya-eagler-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ksaya-eagler
+  namespace: ksaya-eagler
+spec:
+  type: NodePort
+  selector:
+    app: ksaya-eagler
+  ports:
+    - name: game
+      port: 25565
+      targetPort: 25565
+      nodePort: 30112
+    - name: web
+      port: 8080
+      targetPort: 8080
+      nodePort: 30113

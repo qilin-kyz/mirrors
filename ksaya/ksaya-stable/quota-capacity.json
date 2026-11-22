@@ -1,0 +1,135 @@
+{
+  "_readme": "KSAYA 账号-额度-算力多对多注册表。账号(accounts)不直接绑定算力；多个账号可向同一个计费额度池(quotas)支取，一个算力资源(computeResources)可由多个额度池支撑。memberships 描述会员制权益（如 Hugging Face Pro），由 adapter 抽象为可调度的瞬时算力。",
+  "version": 1,
+  "quotas": [
+    {
+      "id": "q-aliyun-prod",
+      "label": "阿里云生产通用额度",
+      "unit": "CNY",
+      "limit": 5000,
+      "used": 1230.5,
+      "reset": "monthly",
+      "accounts": ["ARCLOUDALIYUN00000001", "ARCLOUDBLOCK00000001"],
+      "notes": "两个账号共同支取同一个生产额度池"
+    },
+    {
+      "id": "q-aliyun-dev",
+      "label": "阿里云开发测试额度",
+      "unit": "CNY",
+      "limit": 800,
+      "used": 96.25,
+      "reset": "monthly",
+      "accounts": ["ALIYUNDEV0000000000001"],
+      "notes": "开发账户独立额度"
+    },
+    {
+      "id": "q-hf-pro-gpu",
+      "label": "Hugging Face Pro 瞬时 GPU 额度",
+      "unit": "gpu-second",
+      "limit": 360000,
+      "used": 54200,
+      "reset": "monthly",
+      "accounts": ["HFMEMBERPRO0000000001"],
+      "notes": "会员权益换算为 GPU 秒，供瞬时高性能实例租用"
+    },
+    {
+      "id": "q-faas-free",
+      "label": "函数计算免费额度",
+      "unit": "invocation",
+      "limit": 1000000,
+      "used": 23410,
+      "reset": "monthly",
+      "accounts": ["KSAYAFNCOMPUTE00000001", "ALIYUNDEV0000000000001"],
+      "notes": "函数计算与 dev 账户共享调用额度"
+    }
+  ],
+  "computeResources": [
+    {
+      "id": "cr-aliyun-ecs-cpu",
+      "label": "阿里云 ECS 计算节点",
+      "kind": "cpu.cluster",
+      "vendor": "aliyun",
+      "adapter": "aliyun-ecs",
+      "quotas": ["q-aliyun-prod"],
+      "capacity": {"vcpu": 32, "memGiB": 128, "region": "cn-hangzhou"},
+      "notes": "集群中的云端 ECS 节点"
+    },
+    {
+      "id": "cr-aliyun-essd",
+      "label": "阿里云 ESSD 云盘",
+      "kind": "block",
+      "vendor": "aliyun",
+      "adapter": "aliyun-essd",
+      "quotas": ["q-aliyun-prod"],
+      "capacity": {"sizeGiB": 2048, "iops": 60000},
+      "notes": "块存储资源"
+    },
+    {
+      "id": "cr-hf-a100-spot",
+      "label": "HF 会员瞬时 A100",
+      "kind": "gpu.spot",
+      "vendor": "huggingface",
+      "adapter": "hf-member-spot",
+      "quotas": ["q-hf-pro-gpu"],
+      "capacity": {"gpu": "A100", "vramGiB": 40, "maxLeaseSec": 600, "ephemeral": true},
+      "notes": "Hugging Face Pro 会员的瞬时高性能显卡实例，按 GPU 秒计费，非标准 IaaS 接口"
+    },
+    {
+      "id": "cr-hf-t4-spot",
+      "label": "HF 会员瞬时 T4",
+      "kind": "gpu.spot",
+      "vendor": "huggingface",
+      "adapter": "hf-member-spot",
+      "quotas": ["q-hf-pro-gpu"],
+      "capacity": {"gpu": "T4", "vramGiB": 16, "maxLeaseSec": 900, "ephemeral": true},
+      "notes": "同一会员额度池支撑多种 GPU 型号"
+    },
+    {
+      "id": "cr-faas-ingest",
+      "label": "函数计算摄取算力",
+      "kind": "function",
+      "vendor": "generic-faas",
+      "adapter": "faas-invoke",
+      "quotas": ["q-faas-free"],
+      "capacity": {"maxInvokePerMin": 10000, "timeoutSec": 60},
+      "notes": "函数计算调用额度由两个账号共享"
+    }
+  ],
+  "memberships": [
+    {
+      "id": "hf-pro-001",
+      "provider": "huggingface",
+      "plan": "PRO",
+      "account": "HFMEMBERPRO0000000001",
+      "grantsQuotas": ["q-hf-pro-gpu"],
+      "expiresAt": null,
+      "notes": "会员权益本身不是云主机，但通过 adapter 抽象为可调度的瞬时 GPU 算力"
+    }
+  ],
+  "adapters": [
+    {
+      "name": "hf-member-spot",
+      "description": "Hugging Face 会员瞬时 GPU：把会员权益抽象为 describe/acquire/release/invoke/status/bill 六段协议",
+      "operations": ["describe", "acquire", "release", "invoke", "status", "bill"],
+      "nonStandard": true
+    },
+    {
+      "name": "aliyun-ecs",
+      "description": "阿里云 ECS 标准 IaaS 适配",
+      "operations": ["describe", "acquire", "release", "status", "bill"],
+      "nonStandard": false
+    },
+    {
+      "name": "aliyun-essd",
+      "description": "阿里云云盘块存储适配",
+      "operations": ["describe", "acquire", "release", "status", "bill"],
+      "nonStandard": false
+    },
+    {
+      "name": "faas-invoke",
+      "description": "函数计算调用适配",
+      "operations": ["describe", "invoke", "status", "bill"],
+      "nonStandard": false
+    }
+  ]
+}

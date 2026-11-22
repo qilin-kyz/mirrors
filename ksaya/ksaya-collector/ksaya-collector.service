@@ -1,0 +1,16 @@
+[Unit]
+Description=KSAYA collector (节点心跳接收端点，部署在公网机)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/ksaya-collector.py
+Restart=always
+RestartSec=3
+# 监听端口与数据目录（用环境变量覆盖内置默认）
+Environment=KSAYA_COLLECTOR_PORT=80
+Environment=KSAYA_COLLECTOR_DIR=/var/lib/ksaya-collector
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,101 @@
+# KSAYA 发布流水线
+#
+# 触发方式：
+#   1) 打 tag 推送：  git tag ksaya-v1.0 && git push origin ksaya-v1.0
+#   2) 手动 workflow_dispatch（指定 tag 名）
+#
+# 做什么：真实构建 KSAYA 1.0 出厂安装 ISO，然后创建 GitHub Release 并把
+# ISO 作为 Release 资产上传。Release 资产对公开仓库可匿名下载（无需 token），
+# 所以下游取件不需要任何凭证。
+#
+# 认证：使用 GitHub Actions 内置的 GITHUB_TOKEN（permissions.contents: write），
+# 不需要仓库里存任何 PAT。
+
+name: KSAYA Release
+
+on:
+  push:
+    tags:
+      - "ksaya-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag（例：ksaya-v1.0）"
+        required: true
+        default: "ksaya-v1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: 启用 flake
+        run: |
+          mkdir -p ~/.config/nix
+          echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+
+      - name: 构建 KSAYA 1.0 出厂安装 ISO
+        working-directory: ksaya
+        run: |
+          set -o pipefail
+          if ! nix build .#iso --accept-flake-config --print-out-paths 2>&1 | tee /tmp/iso-build.log; then
+            MSG=$(tail -40 /tmp/iso-build.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            echo "::error::KSAYA ISO 构建失败:${MSG}"
+            exit 1
+          fi
+          echo "=== ISO 产物 ==="
+          ls -la result/iso/
+          # result 是符号链接，上传前必须解引用到普通目录
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          find -L result/ -name '*.iso' -type f -exec cp {} "$GITHUB_WORKSPACE/out/" \;
+          echo "=== 待发布 ISO ==="
+          ls -lh "$GITHUB_WORKSPACE/out/"
+          # 记录校验和，随 Release 一起发布
+          ( cd "$GITHUB_WORKSPACE/out" && sha256sum *.iso > SHA256SUMS.txt && cat SHA256SUMS.txt )
+
+      - name: 创建 Release 并上传 ISO
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: KSAYA 1.0
+          body: |
+            # KSAYA 1.0
+
+            KSAYA 是一套面向异构、跨地域私有算力的集群系统：底层是可复现的 NixOS 系统镜像，
+            上层是按「性能差距 / 带宽差距 / 地域差距」决策的分布式调度核心。
+
+            > AR8 是 KSAYA 调度核心在 1.0 之前的代号；1.0 起统一以 KSAYA 命名。
+
+            ## 本 Release 内容
+
+            - `KSAYA-1.0.iso` —— 出厂安装盘：UEFI 引导，内置 flake 源码，离线可装；
+            - `SHA256SUMS.txt` —— ISO 校验和。
+
+            ## 装机
+
+            1. 用 ISO 引导目标机（UEFI）；
+            2. 执行 `ksaya-install /dev/<磁盘>`（GPT：EFI 1G + 根分区，按 label 挂载）；
+            3. 写入完成后重启，系统以 `geo-distributed` profile 运行。
+
+            ## 装出来的系统包含
+
+            - 四 profile 可插拔调度（`nixos-baseline` / `xnu-qos` / `oh-distributed` / `geo-distributed`）；
+            - 唯一节点标识 `/etc/ksaya/node-id` + 开机自动向 collector 注册入群；
+            - `/etc/ksaya/version` = `1.0`；
+            - 异构硬件宽口径 initrd（NVMe / SATA / USB / virtio / 常见有线网卡）。
+          files: |
+            out/*.iso
+            out/SHA256SUMS.txt
+          draft: false
+          prerelease: false
