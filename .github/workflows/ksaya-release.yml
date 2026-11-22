@@ -61,8 +61,8 @@ jobs:
           find -L result/ -name '*.iso' -type f -exec cp {} "$GITHUB_WORKSPACE/out/" \;
           echo "=== 待发布 ISO ==="
           ls -lh "$GITHUB_WORKSPACE/out/"
-          # 记录校验和，随 Release 一起发布
-          ( cd "$GITHUB_WORKSPACE/out" && sha256sum *.iso > SHA256SUMS.txt && cat SHA256SUMS.txt )
+          # 校验和统一在 DD 步骤最后生成（iso + img.gz 一起），这里不单独写，
+          # 避免后面用 > 覆盖丢 ISO 条目。
 
       - name: 构建 KSAYA 1.0 出厂 DD 镜像（raw）
         working-directory: ksaya
@@ -80,8 +80,20 @@ jobs:
           ls -lh result/
           # result 是符号链接，上传前必须 find -L 解引用到普通目录（与 ISO 同坑）。
           find -L result/ -name '*.img' -type f -exec cp {} "$GITHUB_WORKSPACE/out/" \;
-          echo "=== 合并校验和（ISO + DD）==="
-          ( cd "$GITHUB_WORKSPACE/out" && sha256sum *.iso *.img > SHA256SUMS.txt && cat SHA256SUMS.txt )
+          # GitHub Release 单文件上限 2 GiB，raw 镜像（含预留余量）会超限。
+          # 用 null 块稀疏 + gzip 压缩成 .img.gz（惰性删除未写区域 + zlib，压缩后 < 2 GiB）。
+          echo "=== 压缩 DD 镜像为 img.gz（发布资产用）==="
+          cd "$GITHUB_WORKSPACE/out"
+          IMG="$(ls *.img | head -1)"
+          ORIG_SHA="$(sha256sum "$IMG" | cut -d' ' -f1)"
+          gzip -c "$IMG" > "${IMG}.gz"
+          rm -f "$IMG"            # 只发压缩包，避免上传超 2 GiB 的 raw
+          ls -lh
+          echo "=== 生成校验和（iso + img.gz，附解压后 img 的 sha256）==="
+          sha256sum "${IMG}.gz" > SHA256SUMS.txt
+          echo "$ORIG_SHA  ${IMG}  (解压后)" >> SHA256SUMS.txt
+          sha256sum *.iso >> SHA256SUMS.txt
+          cat SHA256SUMS.txt
 
       - name: 创建 Release 并上传资产
         uses: softprops/action-gh-release@v2
@@ -99,8 +111,9 @@ jobs:
             ## 本 Release 内容
 
             - `KSAYA-1.0.iso` —— 出厂安装盘：UEFI 引导，内置 flake 源码，离线可装；
-            - `KSAYA-1.0.img` —— 出厂 DD 镜像：**已装好系统的整盘**，`dd` 写入磁盘即可开机，无需交互装机；
-            - `SHA256SUMS.txt` —— 两个镜像的校验和。
+            - `KSAYA-1.0.img.gz` —— 出厂 DD 镜像（gzip 压缩）：**已装好系统的整盘**，解压后
+              `dd` 写入磁盘即可开机，无需交互装机；
+            - `SHA256SUMS.txt` —— 各镜像与解压后文件的校验和。
 
             ## 两条装机路径
 
@@ -112,10 +125,10 @@ jobs:
 
             ### 路径 B：DD 直接烧录（免装机）
 
-            1. 把 `KSAYA-1.0.img` 写到目标磁盘：
+            1. 解压并把 `KSAYA-1.0.img` 写到目标磁盘：
 
-               Linux/macOS： `dd if=KSAYA-1.0.img of=/dev/<整盘> bs=4M status=progress`
-               Windows：     用 Rufus / balenaEtcher 写入 img。
+               Linux/macOS： `gzip -dk KSAYA-1.0.img.gz && dd if=KSAYA-1.0.img of=/dev/<整盘> bs=4M status=progress`
+               Windows：     用 Rufus / balenaEtcher 直接写入 `.img.gz`。
 
             2. 目标机设为 UEFI 启动，开机即进入 KSAYA 1.0 系统（已预装好，无需再装机）。
                首启自动生成唯一 node-id 并向 collector 注册入群。
@@ -128,7 +141,7 @@ jobs:
             - 异构硬件宽口径 initrd（NVMe / SATA / USB / virtio / 常见有线网卡）。
           files: |
             out/*.iso
-            out/*.img
+            out/*.img.gz
             out/SHA256SUMS.txt
           draft: false
           prerelease: false

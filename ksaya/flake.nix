@@ -99,7 +99,10 @@
             baseName = "KSAYA-1.0";        # 产物 KSAYA-1.0.img
             name = "ksaya-1.0-disk-image";
             diskSize = "auto";
-            additionalSpace = "4096M";     # 装上系统后留 ~4G 可写余量（k3s/containerd/KSAYA state）
+            # 装上系统后留 ~2G 可写余量（k3s/containerd/KSAYA state 几百 MB 级，2G 足够）。
+            # ⚠️ GitHub Release 单文件上限 2 GiB，raw 镜像发布前会 gzip 压缩；
+            #    余量越大 raw 越大、压缩后也越大，别拍太大。2G 是体积/余量的平衡点。
+            additionalSpace = "2048M";
           };
         });
 
