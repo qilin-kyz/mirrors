@@ -85,6 +85,22 @@
           # 出厂 ISO：默认产出 KSAYA 1.0 融合版；geo 版仍可用
           #   nix build .#nixosConfigurations.ksaya-geo-installer.config.system.build.isoImage
           iso = self.nixosConfigurations."ksaya-1.0-installer".config.system.build.isoImage;
+          # 出厂 DD 镜像：raw 磁盘镜像，dd 写入磁盘即可开机（预装好系统，无需交互装机）。
+          #   nix build .#diskImage   → 得到 KSAYA-1.0.img
+          # 与 ISO 的区别：ISO 是「可引导安装盘，要ksaya-install 交互装机」；
+          # DD 镜像是「已装好的整盘」，dd 进去直接就是 geo-distributed 系统。
+          diskImage = let
+            cfg = self.nixosConfigurations."ksaya-1.0-disk";
+          in import "${nixpkgs}/nixos/lib/make-disk-image.nix" {
+            inherit (cfg) config pkgs;
+            lib = nixpkgs.lib;
+            format = "raw";                # 裸盘镜像，dd 直接写
+            partitionTableType = "efi";    # UEFI + systemd-boot（ESP label=ESP 挂 /boot）
+            baseName = "KSAYA-1.0";        # 产物 KSAYA-1.0.img
+            name = "ksaya-1.0-disk-image";
+            diskSize = "auto";
+            additionalSpace = "4096M";     # 装上系统后留 ~4G 可写余量（k3s/containerd/KSAYA state）
+          };
         });
 
       # ---- overlay：让 nixpkgs 里出现 pkgs.ksaya ----
@@ -133,6 +149,16 @@
               { nixpkgs.overlays = [ overlay ]; }
               "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-base.nix"
               ./hosts/ksaya-1.0-installer.nix
+            ];
+          };
+          # ---- KSAYA 1.0 出厂 DD 镜像目标：与 ksaya-1.0 同源，仅关闭 EFI NVRAM 写入 ----
+          # 供 packages.diskImage 用 make-disk-image 打成 raw 镜像。可移植：
+          # 启动靠 ESP fallback \EFI\BOOT\BOOTX64.EFI，不预写目标机 NVRAM。
+          "ksaya-1.0-disk" = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              { nixpkgs.overlays = [ overlay ]; }
+              ./hosts/ksaya-1.0-disk.nix
             ];
           };
         };

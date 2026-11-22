@@ -34,9 +34,12 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot";
 
-  # ---- 磁盘：按 label 挂载（install 脚本建立 EFI/nixos 分区并打标）----
+  # ---- 磁盘：按 label 挂载 ----
+  #   /boot 的 ESP 卷标统一为 "ESP"：既对齐 ISO 装机脚本（mkfs.vfat -n ESP），
+  #   也对齐 make-disk-image 的默认 ESP 卷标（mkfs.vfat -n ESP），两条装机/烧录
+  #   路径共用同一 host 配置，无需分叉。
   fileSystems."/boot" = {
-    device = "/dev/disk/by-label/EFI";
+    device = "/dev/disk/by-label/ESP";
     fsType = "vfat";
   };
   fileSystems."/" = {

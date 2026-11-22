@@ -29,20 +29,22 @@ let
     # 清空分区表 + 建 GPT + 两个分区（EFI 1G + 根 剩余）
     wipefs -a "$DISK" || true
     sgdisk --zap-all "$DISK"
-    sgdisk -n 1:0:+1G -t 1:ef00 -c 1:EFI "$DISK"
+    sgdisk -n 1:0:+1G -t 1:ef00 -c 1:ESP "$DISK"
     sgdisk -n 2:0:0 -t 2:8300 -c 2:nixos "$DISK"
     partprobe "$DISK" || true
     sleep 2
 
     # 分区设备名（NVMe 是 ''${DISK}p1 形式，SATA 是 ''${DISK}1 形式）
     if [ -e "''${DISK}p1" ]; then P="''${DISK}p"; else P="''${DISK}"; fi
-    mkfs.vfat -F 32 -n EFI "''${P}1"
+    mkfs.vfat -F 32 -n ESP "''${P}1"
     mkfs.ext4 -L nixos "''${P}2"
 
     # 挂载 + 安装（host 已写死按 label 挂载，flake 装机无需 generate-config）
+    # ESP 卷标统一为 "ESP"：同时对齐 make-disk-image 硬编码的 ESP 卷标，
+    # 使「ISO 装机」与「DD 烧录」两条路径产出的盘用同一 /boot 挂载（by-label/ESP）。
     mount /dev/disk/by-label/nixos /mnt
     mkdir -p /mnt/boot
-    mount /dev/disk/by-label/EFI /mnt/boot
+    mount /dev/disk/by-label/ESP /mnt/boot
 
     # 定位 flake 源码（随盘在 /etc/ksaya-flake，若不存在则取当前源码树）
     FLAKE="''${KSAYA_FLAKE:-/etc/ksaya-flake}"

@@ -64,7 +64,26 @@ jobs:
           # 记录校验和，随 Release 一起发布
           ( cd "$GITHUB_WORKSPACE/out" && sha256sum *.iso > SHA256SUMS.txt && cat SHA256SUMS.txt )
 
-      - name: 创建 Release 并上传 ISO
+      - name: 构建 KSAYA 1.0 出厂 DD 镜像（raw）
+        working-directory: ksaya
+        run: |
+          set -o pipefail
+          if ! nix build .#diskImage --accept-flake-config 2>&1 | tee /tmp/disk-build.log; then
+            MSG=$(tail -40 /tmp/disk-build.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::KSAYA DD 镜像构建失败:${MSG}"
+            exit 1
+          fi
+          echo "=== DD 镜像产物 ==="
+          ls -lh result/
+          # result 是符号链接，上传前必须 find -L 解引用到普通目录（与 ISO 同坑）。
+          find -L result/ -name '*.img' -type f -exec cp {} "$GITHUB_WORKSPACE/out/" \;
+          echo "=== 合并校验和（ISO + DD）==="
+          ( cd "$GITHUB_WORKSPACE/out" && sha256sum *.iso *.img > SHA256SUMS.txt && cat SHA256SUMS.txt )
+
+      - name: 创建 Release 并上传资产
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
@@ -80,13 +99,26 @@ jobs:
             ## 本 Release 内容
 
             - `KSAYA-1.0.iso` —— 出厂安装盘：UEFI 引导，内置 flake 源码，离线可装；
-            - `SHA256SUMS.txt` —— ISO 校验和。
+            - `KSAYA-1.0.img` —— 出厂 DD 镜像：**已装好系统的整盘**，`dd` 写入磁盘即可开机，无需交互装机；
+            - `SHA256SUMS.txt` —— 两个镜像的校验和。
 
-            ## 装机
+            ## 两条装机路径
+
+            ### 路径 A：ISO 交互装机
 
             1. 用 ISO 引导目标机（UEFI）；
-            2. 执行 `ksaya-install /dev/<磁盘>`（GPT：EFI 1G + 根分区，按 label 挂载）；
+            2. 执行 `ksaya-install /dev/<磁盘>`（GPT：ESP 1G + 根分区，按 label 挂载）；
             3. 写入完成后重启，系统以 `geo-distributed` profile 运行。
+
+            ### 路径 B：DD 直接烧录（免装机）
+
+            1. 把 `KSAYA-1.0.img` 写到目标磁盘：
+
+               Linux/macOS： `dd if=KSAYA-1.0.img of=/dev/<整盘> bs=4M status=progress`
+               Windows：     用 Rufus / balenaEtcher 写入 img。
+
+            2. 目标机设为 UEFI 启动，开机即进入 KSAYA 1.0 系统（已预装好，无需再装机）。
+               首启自动生成唯一 node-id 并向 collector 注册入群。
 
             ## 装出来的系统包含
 
@@ -96,6 +128,7 @@ jobs:
             - 异构硬件宽口径 initrd（NVMe / SATA / USB / virtio / 常见有线网卡）。
           files: |
             out/*.iso
+            out/*.img
             out/SHA256SUMS.txt
           draft: false
           prerelease: false

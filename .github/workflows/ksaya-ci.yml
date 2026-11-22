@@ -64,7 +64,7 @@ jobs:
                    001-thinkpad-x270 001-thinkpad-x270-xnu-qos \
                    001-thinkpad-x270-oh-distributed \
                    001-thinkpad-x270-geo-distributed \
-                   ksaya-geo-standalone ksaya-1.0; do
+                   ksaya-geo-standalone ksaya-1.0 ksaya-1.0-disk; do
             if ! nix eval --accept-flake-config --raw \
                  ".#nixosConfigurations.\"${c}\".config.system.build.toplevel.drvPath" \
                  2>&1 | tee /tmp/eval.log; then
@@ -188,6 +188,40 @@ jobs:
           path: ksaya-iso-out/*.iso
           if-no-files-found: error   # ISO 没产出就显式失败，不再静默漏传
           compression-level: 0   # ISO 已压缩，不再二次压缩
+
+      # KSAYA 1.0 出厂 DD 镜像：raw 磁盘镜像，dd 写入任意磁盘即可开机（预装好系统，
+      # 无需交互装机）。用 make-disk-image（partitionTableType=efi + systemd-boot）。
+      # 与 ISO 的区别：ISO 是可引导安装盘（需 ksaya-install 交互装机）；DD 是「已装好的
+      # 整盘」，dd 进去直接就是 geo-distributed 系统。
+      - name: 构建 KSAYA 1.0 出厂 DD 镜像（raw）
+        working-directory: ksaya
+        run: |
+          set -o pipefail
+          if ! nix build .#diskImage --accept-flake-config 2>&1 | tee /tmp/ksaya10-disk.log; then
+            MSG=$(tail -40 /tmp/ksaya10-disk.log | head -c 1800)
+            MSG="${MSG//'%'/'%25'}"
+            MSG="${MSG//$'\n'/'%0A'}"
+            MSG="${MSG//$'\r'/'%0D'}"
+            echo "::error::KSAYA 1.0 DD 镜像构建失败:${MSG}"
+            exit 1
+          fi
+          echo "=== DD 镜像产物 ==="
+          ls -lh result/
+          # result 是符号链接，上传前必须 find -L 解引用到普通目录。
+          mkdir -p "$GITHUB_WORKSPACE/ksaya-disk-out"
+          find -L result/ -name '*.img' -type f -exec cp {} "$GITHUB_WORKSPACE/ksaya-disk-out/" \;
+          echo "=== 待上传 DD 镜像（解引用后）==="
+          ls -lh "$GITHUB_WORKSPACE/ksaya-disk-out/"
+
+      - name: 上传 KSAYA 1.0 出厂 DD 镜像
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksaya-1.0-disk-image
+          path: ksaya-disk-out/*.img
+          if-no-files-found: error   # DD 镜像没产出就显式失败
+          compression-level: 9   # raw 镜像未压缩，尽量压，减小下载体积
+          retention-days: 7      # DD 镜像大，只保留 7 天（正式发布走 release 资产）
 
   # ------------------------------------------------------------------
   # Job 3：四版本基准 + 单测（纯 Python，独立于 Nix 构建）
